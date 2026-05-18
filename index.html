@@ -6,52 +6,54 @@
     <title>Asistencia Profe</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        :root { --bg: #000; --card: #121212; --accent: #e8ff47; --green: #4ade80; --red: #ff4d4d; }
-        body { background: var(--bg); color: #fff; font-family: -apple-system, sans-serif; margin: 0; padding: 15px; padding-bottom: 100px; }
+        :root { --bg: #000; --card: #121212; --accent: #e8ff47; --red: #ff4d4d; }
+        body { background: var(--bg); color: #fff; font-family: sans-serif; margin: 0; padding: 15px; padding-bottom: 100px; }
         .card { background: var(--card); border: 1px solid #282828; padding: 20px; border-radius: 16px; text-align: center; margin-bottom: 15px; }
-        .stats { display: flex; gap: 10px; margin-bottom: 15px; }
-        .stat-box { flex: 1; background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid #282828; }
         .btn { width: 100%; padding: 18px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; }
         .btn-main { background: var(--accent); color: #000; }
         .btn-red { background: rgba(255,77,77,0.1); color: var(--red); border: 1px solid var(--red); }
-        input { width: 100%; padding: 18px; border-radius: 12px; border: 1px solid #333; background: #1a1a1a; color: #fff; font-size: 22px; text-align: center; margin: 15px 0; }
+        input { width: 100%; padding: 18px; border-radius: 12px; border: 1px solid #333; background: #1a1a1a; color: #fff; font-size: 22px; text-align: center; margin: 15px 0; box-sizing: border-box; }
         .nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #121212; display: flex; padding: 20px 0; border-top: 1px solid #282828; }
         .nav button { flex: 1; background: none; border: none; color: #666; font-weight: bold; }
         .nav button.active { color: var(--accent); }
-        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #222; text-align: left; }
-        .badge { font-size: 10px; padding: 4px 8px; border-radius: 5px; font-weight: bold; }
+        .list-item { padding: 15px; border-bottom: 1px solid #222; text-align: left; display: flex; align-items: center; }
+        .pc-badge { background: #333; padding: 4px 8px; border-radius: 6px; font-size: 11px; margin-right: 15px; min-width: 45px; text-align: center; }
     </style>
 </head>
 <body>
 
     <div id="view-alumno" style="display:none">
         <div class="card">
-            <h2>Asistencia</h2>
-            <input type="text" id="alu-id" placeholder="ID ALUMNO">
-            <button class="btn btn-main" id="btn-env" onclick="registrar()">REGISTRAR</button>
+            <div style="font-size: 40px;">📝</div>
+            <h2>Registro de Asistencia</h2>
+            <input type="text" id="alu-id" placeholder="TU ID (EJ: ALU-001)">
+            <button class="btn btn-main" id="btn-env" onclick="registrar()">ENVIAR ASISTENCIA</button>
         </div>
     </div>
 
     <div id="view-profe" style="display:none">
-        <div class="stats">
-            <div class="stat-box"><b id="count-p" style="color:var(--green); font-size:24px">0</b><br><small>PRESENTES</small></div>
-            <div class="stat-box"><b id="count-t" style="font-size:24px">0</b><br><small>TOTAL</small></div>
+        <div class="card">
+            <h3 id="txt-total">Cargando alumnos...</h3>
         </div>
+
         <div id="panel-qr" class="card">
             <div id="qr-container" style="background:#fff; padding:10px; display:inline-block; border-radius:10px"></div>
-            <button class="btn btn-red" onclick="finalizar()">FINALIZAR CLASE (Ausentes)</button>
+            <p style="color:#888; font-size: 12px; margin-top: 10px;">Escanea para registrarte</p>
+            <button class="btn btn-red" id="btn-fin" onclick="finalizar()">FINALIZAR CLASE Y MARCAR AUSENTES</button>
         </div>
-        <div id="panel-lista" class="card" style="display:none; padding:5px">
+
+        <div id="panel-lista" class="card" style="display:none; padding:0">
             <div id="lista-output"></div>
         </div>
+
         <div class="nav">
             <button onclick="tab('qr')" id="b-qr" class="active">QR</button>
-            <button onclick="tab('lista')" id="b-lista">LISTA</button>
+            <button onclick="tab('lista')" id="b-lista">ALUMNOS</button>
         </div>
     </div>
 
 <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzbDAFPQac467Mk2e3KNC8nhlSriOgw4uamlPWLvOQSYArk4dlbXFBjYtWbCGDlQZxW/exec'; // <--- PEGA TU URL AQUÍ
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbybDAFPQac467Mk2e3KNC8nhlSriOgw4uamlPWLvOQSYArk4dlbXFBjYtWbCGD1QZxW/exec';
     const isAdmin = window.location.search.includes('admin=123');
     let db = [];
 
@@ -60,12 +62,11 @@
             const r = await fetch(SCRIPT_URL);
             db = await r.json();
             if(isAdmin) {
-                document.getElementById('count-t').innerText = db.length;
-                document.getElementById('count-p').innerText = db.filter(a => a.estado === 'presente').length;
+                document.getElementById('txt-total').innerText = "Total Alumnos: " + db.length;
                 document.getElementById('lista-output').innerHTML = db.map(a => `
                     <div class="list-item">
-                        <span><b>${a.nombre}</b><br><small style="color:#777">${a.pc}</small></span>
-                        <span class="badge" style="background:${a.estado === 'presente' ? '#4ade80':'#333'}; color:${a.estado === 'presente' ? '#000':'#fff'}">${a.estado.toUpperCase()}</span>
+                        <span class="pc-badge">${a.pc}</span>
+                        <span><b>${a.nombre}</b></span>
                     </div>
                 `).join('');
             }
@@ -77,8 +78,8 @@
         const alu = db.find(x => x.code === id);
         if(!alu) return alert("ID no válido");
         
-        document.getElementById('btn-env').disabled = true;
-        document.getElementById('btn-env').innerText = "ENVIANDO...";
+        const btn = document.getElementById('btn-env');
+        btn.disabled = true; btn.innerText = "ENVIANDO...";
 
         await fetch(SCRIPT_URL, {
             method: 'POST',
@@ -89,20 +90,22 @@
                 estado: 'Presente', hora: new Date().toLocaleTimeString('es-AR')
             })
         });
-        alert("✅ Presente enviado");
+        alert("✅ ¡Presente enviado!");
         location.reload();
     }
 
     async function finalizar() {
-        if(!confirm("¿Cerrar clase? Los que no firmaron serán marcados como AUSENTE.")) return;
-        alert("Procesando ausentes... espera la confirmación.");
+        if(!confirm("¿Cerrar clase? Se marcará AUSENTE a los que no firmaron.")) return;
+        const btn = document.getElementById('btn-fin');
+        btn.disabled = true; btn.innerText = "PROCESANDO AUSENTES...";
+
         await fetch(SCRIPT_URL, {
             method: 'POST',
             mode: 'no-cors',
             body: JSON.stringify({ action: "finalizar", fecha: new Date().toLocaleDateString('es-AR') })
         });
-        alert("✅ Clase finalizada y ausentes marcados.");
-        cargar();
+        alert("✅ Ausentes marcados en el Excel.");
+        btn.disabled = false; btn.innerText = "FINALIZAR CLASE Y MARCAR AUSENTES";
     }
 
     function tab(t) {
@@ -114,12 +117,11 @@
 
     if(isAdmin) {
         document.getElementById('view-profe').style.display = 'block';
-        new QRCode(document.getElementById("qr-container"), { text: window.location.href.split('?')[0], width: 200, height: 200 });
+        new QRCode(document.getElementById("qr-container"), { text: window.location.href.split('?')[0], width: 220, height: 220 });
     } else {
         document.getElementById('view-alumno').style.display = 'block';
     }
     cargar();
-    if(isAdmin) setInterval(cargar, 10000);
 </script>
 </body>
 </html>
