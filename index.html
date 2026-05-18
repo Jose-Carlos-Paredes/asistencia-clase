@@ -1,180 +1,142 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Sistema de Asistencia</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<style>
-:root{ --bg:#000; --card:#121212; --border:#282828; --text:#fff; --muted:#a0a0a0; --accent:#e8ff47; --green:#4ade80; --red:#f87171; }
-*{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
-body{background:var(--bg); color:var(--text); font-family:'DM Sans', sans-serif; overflow-x:hidden;}
-
-/* INTERFAZ GENERAL */
-.app-container{padding:20px; max-width:500px; margin:0 auto;}
-.card{background:var(--card); border:1px solid var(--border); padding:20px; border-radius:16px; margin-bottom:15px;}
-
-/* VISTA PROFESOR */
-.header-profe{display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;}
-.qr-box{background:white; padding:15px; border-radius:12px; display:inline-block;}
-.qr-box img{width:100% !important; height:auto !important; max-width:220px;}
-.stat-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;}
-.nav-profe{position:fixed; bottom:0; left:0; width:100%; background:#121212; display:flex; border-top:1px solid var(--border); padding:10px 0 20px 0;}
-.nav-btn{flex:1; background:none; border:none; color:var(--muted); font-size:12px;}
-.nav-btn.active{color:var(--accent);}
-
-/* VISTA ALUMNO */
-.input-alu{width:100%; padding:18px; border-radius:12px; border:1px solid var(--border); background:#1a1a1a; color:white; font-size:22px; text-align:center; margin-bottom:15px; font-weight:bold;}
-.btn-alu{background:var(--accent); color:#000; border:none; padding:18px; border-radius:12px; font-weight:700; width:100%; font-size:16px;}
-
-.status-dot{width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:5px;}
-.status-ok{background:var(--green); box-shadow:0 0 8px var(--green);}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sistema de Asistencia</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        :root { --bg: #000; --card: #111; --accent: #e8ff47; --text: #fff; --red: #ff4d4d; --green: #4ade80; }
+        body { background: var(--bg); color: var(--text); font-family: sans-serif; margin: 0; padding: 15px; }
+        .card { background: var(--card); border: 1px solid #333; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 15px; }
+        input { width: 100%; padding: 18px; margin: 15px 0; border-radius: 12px; border: 1px solid #444; background: #222; color: #fff; font-size: 22px; text-align: center; box-sizing: border-box; }
+        .btn { width: 100%; padding: 18px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; font-size: 16px; }
+        .btn-main { background: var(--accent); color: #000; }
+        .btn-red { background: none; border: 1px solid var(--red); color: var(--red); margin-top: 20px; }
+        #qr-container { background: #fff; padding: 15px; display: inline-block; border-radius: 12px; margin: 15px 0; }
+        #qr-container img { width: 220px; height: 220px; }
+        .stats { display: flex; gap: 10px; margin-bottom: 15px; }
+        .stat-box { flex: 1; background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid #333; }
+        .nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #111; display: flex; padding: 15px 0 30px 0; border-top: 1px solid #333; }
+        .nav button { flex: 1; background: none; border: none; color: #888; font-size: 12px; font-weight: bold; }
+        .nav button.active { color: var(--accent); }
+        .list-item { text-align: left; padding: 10px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; }
+        .badge { font-size: 10px; padding: 3px 8px; border-radius: 4px; background: #333; }
+    </style>
 </head>
 <body>
 
-<div class="app-container">
-    
     <div id="view-alumno" style="display:none">
-        <div style="text-align:center; padding:30px 0">
-            <div style="font-size:50px">📝</div>
-            <h2 style="margin-top:10px">Registro de Asistencia</h2>
-            <p id="fecha-alu" style="color:var(--muted); font-size:14px; margin-bottom:30px"></p>
-            
-            <div id="alu-form">
-                <input type="text" id="alu-id" placeholder="TU ID (Ej: ALU-001)" class="input-alu">
-                <button class="btn-alu" onclick="marcarAsistencia()">CONFIRMAR PRESENTE</button>
-            </div>
-
-            <div id="alu-success" style="display:none">
-                <div class="card" style="border-color:var(--green)">
-                    <div style="font-size:40px">✅</div>
-                    <h3 id="alu-nombre-ok" style="color:var(--green); margin:10px 0"></h3>
-                    <p>Tu presente ha sido registrado correctamente.</p>
-                </div>
-            </div>
+        <div class="card">
+            <div style="font-size: 50px; margin-bottom: 10px;">📱</div>
+            <h2>Registrar Presente</h2>
+            <p style="color: #888;">Ingresa tu código ID de alumno</p>
+            <input type="text" id="alu-id" placeholder="ALU-001" autocomplete="off">
+            <button class="btn btn-main" onclick="registrar()">ENVIAR ASISTENCIA</button>
         </div>
     </div>
 
     <div id="view-profe" style="display:none">
-        <div class="header-profe">
-            <h3>Panel Profesor</h3>
-            <span id="clock" style="font-weight:bold">--:--</span>
+        <div class="stats">
+            <div class="stat-box"><b id="count-p" style="color:var(--green); font-size:24px">0</b><br><small>PRESENTES</small></div>
+            <div class="stat-box"><b id="count-t" style="font-size:24px">0</b><br><small>TOTAL</small></div>
+        </div>
+        
+        <div id="panel-qr" class="card">
+            <p style="font-weight: bold; margin-bottom: 10px;">Código QR para la clase</p>
+            <div id="qr-container"></div>
+            <p style="font-size: 12px; color: #888;">Los alumnos escanean este código<br>para abrir su página de registro.</p>
+            <button class="btn btn-red" onclick="cerrar()">Finalizar Clase y Marcar Ausentes</button>
         </div>
 
-        <div id="profe-qr" style="text-align:center">
-            <div class="stat-grid">
-                <div class="card">
-                    <span id="p-count" style="font-size:24px; color:var(--green); font-weight:bold">0</span>
-                    <p style="font-size:10px; color:var(--muted)">PRESENTES</p>
-                </div>
-                <div class="card">
-                    <span id="t-count" style="font-size:24px; font-weight:bold">0</span>
-                    <p style="font-size:10px; color:var(--muted)">TOTAL</p>
-                </div>
-            </div>
-            <div class="card">
-                <p style="font-size:12px; margin-bottom:15px; color:var(--muted)">Muestra este QR a la clase:</p>
-                <div class="qr-box" id="qr-dest"></div>
-            </div>
-            <button onclick="cerrarClase()" style="background:none; border:1px solid var(--red); color:var(--red); padding:10px; width:100%; border-radius:10px; font-size:12px">FINALIZAR CLASE</button>
+        <div id="panel-lista" class="card" style="display:none;">
+            <h3 style="text-align: left; margin-bottom: 15px;">Control en Vivo:</h3>
+            <div id="lista-alumnos">Cargando lista...</div>
         </div>
 
-        <div id="profe-lista" style="display:none">
-            <h3>Asistencia en Vivo</h3>
-            <div id="lista-alumnos" style="margin-top:15px"></div>
+        <div class="nav">
+            <button onclick="tab('qr')" id="btn-qr" class="active">MOSTRAR QR</button>
+            <button onclick="tab('lista')" id="btn-lista">VER LISTADO</button>
         </div>
-
-        <nav class="nav-profe">
-            <button class="nav-btn active" onclick="tab('qr')">MOSTRAR QR</button>
-            <button class="nav-btn" onclick="tab('lista')">VER LISTA</button>
-        </nav>
     </div>
 
-</div>
-
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyu_pfpQjG0kjfPN-GyCbsiTX3dE1tq89p-YCojsWFWTafYNhMLJtuuQQhYPfPWRhEe/exec';
-let alumnosDB = [];
-let registroAsistencia = {};
-
-// 1. DETECCIÓN DE ROL (Seguridad)
-const urlParams = new URLSearchParams(window.location.search);
-const isAdmin = urlParams.get('admin') === '123'; // <--- ESTA ES TU LLAVE SECRETA
-
-function iniciarApp() {
-    if (isAdmin) {
-        document.getElementById('view-profe').style.display = 'block';
-        generarQR();
-        fetchDatos();
-    } else {
-        document.getElementById('view-alumno').style.display = 'block';
-        document.getElementById('fecha-alu').innerText = new Date().toLocaleDateString();
-        fetchDatos(); // Cargamos lista para validar IDs
-    }
-}
-
-// LÓGICA PROFESOR
-async function fetchDatos() {
-    try {
-        const r = await fetch(SCRIPT_URL);
-        alumnosDB = await r.json();
-        alumnosDB.forEach(a => { if(!registroAsistencia[a.code]) registroAsistencia[a.code] = 'pend'; });
-        actualizarUI();
-    } catch(e) { console.error("Error cargando datos"); }
-}
-
-function generarQR() {
-    const urlLimpia = window.location.href.split('?')[0]; // URL sin la llave admin
-    new QRCode(document.getElementById("qr-dest"), {
-        text: urlLimpia,
-        width: 220,
-        height: 220
-    });
-}
-
-// LÓGICA ALUMNO
-async function marcarAsistencia() {
-    const id = document.getElementById('alu-id').value.trim().toUpperCase();
-    const alumno = alumnosDB.find(a => a.code === id);
-
-    if (!alumno) return alert("ID no reconocido");
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyu_pfpQjG0kjfPN-GyCbsiTX3dE1tq89p-YCojsWFWTafYNhMLJtuuQQhYPfPWRhEe/exec';
     
-    const hora = new Date().toLocaleTimeString();
-    try {
-        await fetch(SCRIPT_URL, {
-            method: 'POST',
-            body: JSON.stringify({
-                fecha: new Date().toLocaleDateString(),
-                codigo: id, nombre: alumno.nombre, pc: alumno.pc,
-                estado: 'Presente', hora: hora
-            })
-        });
-        document.getElementById('alu-form').style.display = 'none';
-        document.getElementById('alu-success').style.display = 'block';
-        document.getElementById('alu-nombre-ok').innerText = "¡Hola, " + alumno.nombre + "!";
-    } catch(e) { alert("Error de conexión"); }
-}
+    // Verificamos si es el profesor usando la "llave" en la URL
+    const params = new URLSearchParams(window.location.search);
+    const isAdmin = params.get('admin') === '123';
+    
+    let db = [];
+    let asistenciaLocal = {};
 
-// UTILIDADES
-function tab(t) {
-    document.getElementById('profe-qr').style.display = t === 'qr' ? 'block' : 'none';
-    document.getElementById('profe-lista').style.display = t === 'lista' ? 'block' : 'none';
-}
+    async function init() {
+        if (isAdmin) {
+            document.getElementById('view-profe').style.display = 'block';
+            // El QR apunta a la URL limpia (sin la llave de admin)
+            const urlLimpia = window.location.href.split('?')[0];
+            new QRCode(document.getElementById("qr-container"), {
+                text: urlLimpia,
+                width: 220, height: 220
+            });
+        } else {
+            document.getElementById('view-alumno').style.display = 'block';
+        }
+        
+        await cargarDatos();
+    }
 
-function actualizarUI() {
-    if(!isAdmin) return;
-    const pres = Object.values(registroAsistencia).filter(x => x === 'pres').length;
-    document.getElementById('p-count').innerText = pres;
-    document.getElementById('t-count').innerText = alumnosDB.length;
-}
+    async function cargarDatos() {
+        try {
+            const r = await fetch(SCRIPT_URL);
+            db = await r.json();
+            document.getElementById('count-t').innerText = db.length;
+            db.forEach(a => asistenciaLocal[a.code] = 'pendiente');
+            renderLista();
+        } catch(e) { console.error("Error cargando base de datos"); }
+    }
 
-setInterval(() => {
-    document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-}, 1000);
+    async function registrar() {
+        const id = document.getElementById('alu-id').value.trim().toUpperCase();
+        const alumno = db.find(a => a.code === id);
+        
+        if(!alumno) return alert("Código ID no válido.");
 
-iniciarApp();
+        try {
+            await fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify({
+                    fecha: new Date().toLocaleDateString(),
+                    codigo: id, nombre: alumno.nombre, pc: alumno.pc,
+                    estado: 'Presente', hora: new Date().toLocaleTimeString()
+                })
+            });
+            alert("¡Presente registrado exitosamente!");
+            // Redirigir a una página de agradecimiento o limpiar para evitar re-envíos
+            document.body.innerHTML = "<div style='text-align:center; padding:50px;'><h1>✅ Hecho</h1><p>Tu asistencia ha sido enviada.</p></div>";
+        } catch(e) { alert("Error al enviar. Revisa tu conexión."); }
+    }
+
+    function tab(t) {
+        document.getElementById('panel-qr').style.display = t === 'qr' ? 'block' : 'none';
+        document.getElementById('panel-lista').style.display = t === 'lista' ? 'block' : 'none';
+        document.getElementById('btn-qr').classList.toggle('active', t === 'qr');
+        document.getElementById('btn-lista').classList.toggle('active', t === 'lista');
+    }
+
+    function renderLista() {
+        if(!isAdmin) return;
+        const container = document.getElementById('lista-alumnos');
+        container.innerHTML = db.map(a => `
+            <div class="list-item">
+                <span><b>${a.nombre}</b> <br><small>${a.pc}</small></span>
+                <span class="badge">${asistenciaLocal[a.code].toUpperCase()}</span>
+            </div>
+        `).join('');
+    }
+
+    init();
 </script>
 </body>
 </html>
