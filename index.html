@@ -24,8 +24,8 @@
 
     <div id="view-alumno" style="display:none">
         <div class="card">
-            <h2>Asistencia</h2>
-            <input type="text" id="alu-id" placeholder="ID ALUMNO">
+            <h2>Registro de Asistencia</h2>
+            <input type="text" id="alu-id" placeholder="TU ID">
             <button class="btn btn-main" id="btn-env" onclick="registrar()">REGISTRAR</button>
         </div>
     </div>
@@ -44,8 +44,8 @@
     </div>
 
 <script>
-    // URL DE TU SCRIPT (LA DE TU CAPTURA)
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzC8hYUukq3kt1h35afkGJVtqgTWmNxCyLgK27pNHaTy_aHKYXzLqZln7-sWC5-K3Y/exec';
+    // URL DE TU SCRIPT
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbybDAFPQac467Mk2e3KNC8nhlSriOgw4uamlPWLvOQSYArk4dlbXFBjYtWbCGD1QZxW/exec';
     const isAdmin = window.location.search.includes('admin=123');
     let db = [];
 
@@ -63,49 +63,49 @@
     }
 
     async function registrar() {
-        const id = document.getElementById('alu-id').value.trim().toUpperCase();
-        const alu = db.find(x => x.code === id);
+        const idInput = document.getElementById('alu-id').value.trim().toUpperCase();
+        const alu = db.find(x => x.code === idInput);
         if(!alu) return alert("ID no encontrado");
         
         const btn = document.getElementById('btn-env');
-        btn.disabled = true; btn.innerText = "VERIFICANDO...";
+        btn.disabled = true; btn.innerText = "PROCESANDO...";
 
         try {
             const resp = await fetch(SCRIPT_URL, {
                 method: 'POST',
                 body: JSON.stringify({
                     fecha: new Date().toLocaleDateString('es-AR'),
-                    codigo: id, nombre: alu.nombre, pc: alu.pc,
-                    estado: 'Presente', hora: new Date().toLocaleTimeString('es-AR')
+                    codigo: alu.code, 
+                    nombre: alu.nombre, 
+                    pc: alu.pc,
+                    estado: 'Presente', 
+                    hora: new Date().toLocaleTimeString('es-AR')
                 })
             });
 
             const res = await resp.json();
 
             if (res.status === "error") {
-                alert("⚠️ Ya has registrado tu asistencia hoy.");
-                btn.disabled = false; btn.innerText = "REGISTRAR";
+                alert("⚠️ Ya estás registrado por hoy.");
             } else {
-                alert("✅ Asistencia registrada.");
-                location.reload();
+                alert("✅ Asistencia registrada correctamente.");
+                document.getElementById('alu-id').value = "";
             }
         } catch(e) {
-            // Fallback si hay problemas de red
-            alert("✅ Solicitud enviada (El Excel validará si eres duplicado).");
-            location.reload();
+            alert("✅ Registro enviado (Si ya estabas, no se duplicará).");
         }
+        btn.disabled = false; btn.innerText = "REGISTRAR";
     }
 
     async function finalizar() {
         if(!confirm("¿Marcar ausentes?")) return;
         const btn = document.getElementById('btn-fin');
-        btn.disabled = true; btn.innerText = "PROCESANDO...";
+        btn.disabled = true; btn.innerText = "MARCANDO...";
         await fetch(SCRIPT_URL, {
             method: 'POST',
-            mode: 'no-cors',
             body: JSON.stringify({ action: "finalizar", fecha: new Date().toLocaleDateString('es-AR') })
         });
-        alert("✅ Ausentes marcados.");
+        alert("✅ Finalizado.");
         btn.disabled = false; btn.innerText = "FINALIZAR CLASE";
     }
 
