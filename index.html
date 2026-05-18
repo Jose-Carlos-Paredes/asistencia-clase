@@ -25,8 +25,8 @@
     <div id="view-alumno" style="display:none">
         <div class="card">
             <h2>Asistencia</h2>
-            <input type="text" id="alu-id" placeholder="TU ID">
-            <button class="btn btn-main" id="btn-env" onclick="registrar()">REGISTRAR</button>
+            <input type="text" id="alu-id" placeholder="INGRESAR ID">
+            <button class="btn btn-main" id="btn-env" onclick="registrar()">ENVIAR ASISTENCIA</button>
         </div>
     </div>
 
@@ -44,14 +44,13 @@
     </div>
 
 <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwdQ6F17c1Nai7AZ7PKDXyMDt5-p8JlKio2VbwJq4oU0ysYGXfmuRsIBzko1Y6Ii5r-/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwfrZmD_zNz2be9rgkeEPz-U-EpAUMFx3jTsIFCS8mgaPAOCfjfKMJ3VMsCPcdJvcq4/exec';
     const isAdmin = window.location.search.includes('admin=123');
     let db = [];
 
-    // Función para obtener fecha en formato d/M/yyyy (ej: 17/5/2026)
-    function getFechaFormateada() {
-        const hoy = new Date();
-        return `${hoy.getDate()}/${hoy.getMonth() + 1}/${hoy.getFullYear()}`;
+    function getFecha() {
+        const d = new Date();
+        return d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear();
     }
 
     async function cargar() {
@@ -70,16 +69,16 @@
     async function registrar() {
         const idVal = document.getElementById('alu-id').value.trim().toUpperCase();
         const alu = db.find(x => x.code === idVal);
-        if(!alu) return alert("ID incorrecto");
+        if(!alu) return alert("ID no válido");
         
         const btn = document.getElementById('btn-env');
-        btn.disabled = true; btn.innerText = "ENVIANDO...";
+        btn.disabled = true; btn.innerText = "VERIFICANDO...";
 
         try {
             const resp = await fetch(SCRIPT_URL, {
                 method: 'POST',
                 body: JSON.stringify({
-                    fecha: getFechaFormateada(),
+                    fecha: getFecha(),
                     codigo: alu.code, 
                     nombre: alu.nombre, 
                     pc: alu.pc,
@@ -91,26 +90,26 @@
             const res = await resp.json();
 
             if (res.status === "error") {
-                alert("⚠️ Ya registrado hoy.");
+                alert("⚠️ Error: Ya registraste tu presencia hoy.");
             } else {
-                alert("✅ Registrado con éxito.");
+                alert("✅ ¡Asistencia registrada!");
                 document.getElementById('alu-id').value = "";
             }
         } catch(e) {
-            alert("✅ Enviado (Si ya estabas en la lista, el sistema lo ignorará).");
+            alert("⚠️ Error de conexión. Intenta de nuevo.");
         }
-        btn.disabled = false; btn.innerText = "REGISTRAR";
+        btn.disabled = false; btn.innerText = "ENVIAR ASISTENCIA";
     }
 
     async function finalizar() {
-        if(!confirm("¿Cerrar clase y marcar ausentes?")) return;
+        if(!confirm("¿Cerrar clase?")) return;
         const btn = document.getElementById('btn-fin');
-        btn.disabled = true; btn.innerText = "MARCANDO...";
+        btn.disabled = true; btn.innerText = "MARCANDO AUSENTES...";
         await fetch(SCRIPT_URL, {
             method: 'POST',
-            body: JSON.stringify({ action: "finalizar", fecha: getFechaFormateada() })
+            body: JSON.stringify({ action: "finalizar", fecha: getFecha() })
         });
-        alert("✅ Listo.");
+        alert("✅ Ausentes marcados en el Excel.");
         btn.disabled = false; btn.innerText = "FINALIZAR CLASE";
     }
 
