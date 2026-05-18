@@ -17,38 +17,29 @@
         .nav button { flex: 1; background: none; border: none; color: #666; font-weight: bold; }
         .nav button.active { color: var(--accent); }
         .list-item { padding: 15px; border-bottom: 1px solid #222; text-align: left; display: flex; align-items: center; }
-        .pc-badge { background: #333; padding: 4px 8px; border-radius: 6px; font-size: 11px; margin-right: 15px; min-width: 45px; text-align: center; }
+        .pc-badge { background: #333; padding: 4px 8px; border-radius: 6px; font-size: 11px; margin-right: 15px; min-width: 40px; text-align: center; }
     </style>
 </head>
 <body>
 
     <div id="view-alumno" style="display:none">
         <div class="card">
-            <div style="font-size: 40px;">📝</div>
-            <h2>Registro de Asistencia</h2>
-            <input type="text" id="alu-id" placeholder="TU ID (EJ: ALU-001)">
-            <button class="btn btn-main" id="btn-env" onclick="registrar()">ENVIAR ASISTENCIA</button>
+            <h2>Registro</h2>
+            <input type="text" id="alu-id" placeholder="TU ID">
+            <button class="btn btn-main" id="btn-env" onclick="registrar()">REGISTRAR</button>
         </div>
     </div>
 
     <div id="view-profe" style="display:none">
-        <div class="card">
-            <h3 id="txt-total">Cargando alumnos...</h3>
-        </div>
-
+        <div class="card"><h3 id="txt-total">Cargando...</h3></div>
         <div id="panel-qr" class="card">
             <div id="qr-container" style="background:#fff; padding:10px; display:inline-block; border-radius:10px"></div>
-            <p style="color:#888; font-size: 12px; margin-top: 10px;">Escanea para registrarte</p>
-            <button class="btn btn-red" id="btn-fin" onclick="finalizar()">FINALIZAR CLASE Y MARCAR AUSENTES</button>
+            <button class="btn btn-red" id="btn-fin" onclick="finalizar()">FINALIZAR CLASE</button>
         </div>
-
-        <div id="panel-lista" class="card" style="display:none; padding:0">
-            <div id="lista-output"></div>
-        </div>
-
+        <div id="panel-lista" class="card" style="display:none; padding:0"><div id="lista-output"></div></div>
         <div class="nav">
             <button onclick="tab('qr')" id="b-qr" class="active">QR</button>
-            <button onclick="tab('lista')" id="b-lista">ALUMNOS</button>
+            <button onclick="tab('lista')" id="b-lista">LISTA</button>
         </div>
     </div>
 
@@ -59,29 +50,29 @@
 
     async function cargar() {
         try {
-            const r = await fetch(SCRIPT_URL);
-            db = await r.json();
+            const resp = await fetch(SCRIPT_URL);
+            if (!resp.ok) throw new Error();
+            db = await resp.json();
             if(isAdmin) {
-                document.getElementById('txt-total').innerText = "Total Alumnos: " + db.length;
+                document.getElementById('txt-total').innerText = "Alumnos: " + db.length;
                 document.getElementById('lista-output').innerHTML = db.map(a => `
-                    <div class="list-item">
-                        <span class="pc-badge">${a.pc}</span>
-                        <span><b>${a.nombre}</b></span>
-                    </div>
+                    <div class="list-item"><span class="pc-badge">${a.pc}</span><span>${a.nombre}</span></div>
                 `).join('');
             }
-        } catch(e) { console.error(e); }
+        } catch(e) {
+            document.getElementById('txt-total').innerText = "Error al conectar. Reintenta.";
+        }
     }
 
     async function registrar() {
         const id = document.getElementById('alu-id').value.trim().toUpperCase();
         const alu = db.find(x => x.code === id);
-        if(!alu) return alert("ID no válido");
+        if(!alu) return alert("ID no encontrado");
         
         const btn = document.getElementById('btn-env');
         btn.disabled = true; btn.innerText = "ENVIANDO...";
 
-        await fetch(SCRIPT_URL, {
+        fetch(SCRIPT_URL, {
             method: 'POST',
             mode: 'no-cors',
             body: JSON.stringify({
@@ -89,23 +80,25 @@
                 codigo: id, nombre: alu.nombre, pc: alu.pc,
                 estado: 'Presente', hora: new Date().toLocaleTimeString('es-AR')
             })
+        }).then(() => {
+            alert("✅ ¡Presente!");
+            location.reload();
         });
-        alert("✅ ¡Presente enviado!");
-        location.reload();
     }
 
     async function finalizar() {
-        if(!confirm("¿Cerrar clase? Se marcará AUSENTE a los que no firmaron.")) return;
+        if(!confirm("¿Marcar ausentes?")) return;
         const btn = document.getElementById('btn-fin');
-        btn.disabled = true; btn.innerText = "PROCESANDO AUSENTES...";
+        btn.disabled = true; btn.innerText = "PROCESANDO...";
 
-        await fetch(SCRIPT_URL, {
+        fetch(SCRIPT_URL, {
             method: 'POST',
             mode: 'no-cors',
             body: JSON.stringify({ action: "finalizar", fecha: new Date().toLocaleDateString('es-AR') })
+        }).then(() => {
+            alert("✅ Finalizado");
+            btn.disabled = false; btn.innerText = "FINALIZAR CLASE";
         });
-        alert("✅ Ausentes marcados en el Excel.");
-        btn.disabled = false; btn.innerText = "FINALIZAR CLASE Y MARCAR AUSENTES";
     }
 
     function tab(t) {
@@ -117,7 +110,7 @@
 
     if(isAdmin) {
         document.getElementById('view-profe').style.display = 'block';
-        new QRCode(document.getElementById("qr-container"), { text: window.location.href.split('?')[0], width: 220, height: 220 });
+        new QRCode(document.getElementById("qr-container"), { text: window.location.href.split('?')[0], width: 200, height: 200 });
     } else {
         document.getElementById('view-alumno').style.display = 'block';
     }
