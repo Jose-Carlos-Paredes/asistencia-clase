@@ -24,7 +24,7 @@
 
     <div id="view-alumno" style="display:none">
         <div class="card">
-            <h2>Registro de Asistencia</h2>
+            <h2>Asistencia</h2>
             <input type="text" id="alu-id" placeholder="TU ID">
             <button class="btn btn-main" id="btn-env" onclick="registrar()">REGISTRAR</button>
         </div>
@@ -44,10 +44,15 @@
     </div>
 
 <script>
-    // URL DE TU SCRIPT
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbybcZqKt9LLfKz3YGKPurUqUnaqhdTVmqRCDiz54QIo2YEhzPgWGUa-5T1sHGtaUH1J/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwdQ6F17c1Nai7AZ7PKDXyMDt5-p8JlKio2VbwJq4oU0ysYGXfmuRsIBzko1Y6Ii5r-/exec';
     const isAdmin = window.location.search.includes('admin=123');
     let db = [];
+
+    // Función para obtener fecha en formato d/M/yyyy (ej: 17/5/2026)
+    function getFechaFormateada() {
+        const hoy = new Date();
+        return `${hoy.getDate()}/${hoy.getMonth() + 1}/${hoy.getFullYear()}`;
+    }
 
     async function cargar() {
         try {
@@ -63,18 +68,18 @@
     }
 
     async function registrar() {
-        const idInput = document.getElementById('alu-id').value.trim().toUpperCase();
-        const alu = db.find(x => x.code === idInput);
-        if(!alu) return alert("ID no encontrado");
+        const idVal = document.getElementById('alu-id').value.trim().toUpperCase();
+        const alu = db.find(x => x.code === idVal);
+        if(!alu) return alert("ID incorrecto");
         
         const btn = document.getElementById('btn-env');
-        btn.disabled = true; btn.innerText = "PROCESANDO...";
+        btn.disabled = true; btn.innerText = "ENVIANDO...";
 
         try {
             const resp = await fetch(SCRIPT_URL, {
                 method: 'POST',
                 body: JSON.stringify({
-                    fecha: new Date().toLocaleDateString('es-AR'),
+                    fecha: getFechaFormateada(),
                     codigo: alu.code, 
                     nombre: alu.nombre, 
                     pc: alu.pc,
@@ -86,26 +91,26 @@
             const res = await resp.json();
 
             if (res.status === "error") {
-                alert("⚠️ Ya estás registrado por hoy.");
+                alert("⚠️ Ya registrado hoy.");
             } else {
-                alert("✅ Asistencia registrada correctamente.");
+                alert("✅ Registrado con éxito.");
                 document.getElementById('alu-id').value = "";
             }
         } catch(e) {
-            alert("✅ Registro enviado (Si ya estabas, no se duplicará).");
+            alert("✅ Enviado (Si ya estabas en la lista, el sistema lo ignorará).");
         }
         btn.disabled = false; btn.innerText = "REGISTRAR";
     }
 
     async function finalizar() {
-        if(!confirm("¿Marcar ausentes?")) return;
+        if(!confirm("¿Cerrar clase y marcar ausentes?")) return;
         const btn = document.getElementById('btn-fin');
         btn.disabled = true; btn.innerText = "MARCANDO...";
         await fetch(SCRIPT_URL, {
             method: 'POST',
-            body: JSON.stringify({ action: "finalizar", fecha: new Date().toLocaleDateString('es-AR') })
+            body: JSON.stringify({ action: "finalizar", fecha: getFechaFormateada() })
         });
-        alert("✅ Finalizado.");
+        alert("✅ Listo.");
         btn.disabled = false; btn.innerText = "FINALIZAR CLASE";
     }
 
