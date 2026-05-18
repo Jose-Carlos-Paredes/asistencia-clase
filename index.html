@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Asistencia de Clase</title>
+    <title>Panel de Asistencia</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root { --bg: #000; --card: #111; --accent: #e8ff47; --text: #fff; --red: #ff4d4d; --green: #4ade80; }
-        body { background: var(--bg); color: var(--text); font-family: sans-serif; margin: 0; padding: 15px; padding-bottom: 80px; }
+        body { background: var(--bg); color: var(--text); font-family: sans-serif; margin: 0; padding: 15px; padding-bottom: 90px; }
         .card { background: var(--card); border: 1px solid #333; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 15px; }
         input { width: 100%; padding: 18px; margin: 15px 0; border-radius: 12px; border: 1px solid #444; background: #222; color: #fff; font-size: 22px; text-align: center; box-sizing: border-box; }
         .btn { width: 100%; padding: 18px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; font-size: 16px; }
@@ -17,22 +17,20 @@
         #qr-container img { width: 220px; height: 220px; }
         .stats { display: flex; gap: 10px; margin-bottom: 15px; }
         .stat-box { flex: 1; background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid #333; text-align: center; }
-        .nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #111; display: flex; padding: 15px 0 25px 0; border-top: 1px solid #333; z-index: 100; }
-        .nav button { flex: 1; background: none; border: none; color: #888; font-size: 11px; font-weight: bold; }
+        .nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #111; display: flex; padding: 15px 0 30px 0; border-top: 1px solid #333; }
+        .nav button { flex: 1; background: none; border: none; color: #888; font-size: 12px; font-weight: bold; }
         .nav button.active { color: var(--accent); }
         .list-item { text-align: left; padding: 12px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
-        .badge { font-size: 10px; padding: 4px 10px; border-radius: 6px; font-weight: bold; }
+        .badge { font-size: 11px; padding: 5px 10px; border-radius: 6px; font-weight: bold; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
     <div id="view-alumno" style="display:none">
         <div class="card">
-            <div style="font-size: 50px;">📝</div>
-            <h2>Registro de Asistencia</h2>
-            <p style="color: #888;">Ingresa tu código de alumno</p>
-            <input type="text" id="alu-id" placeholder="ALU-001">
-            <button class="btn btn-main" onclick="registrar()">REGISTRAR PRESENTE</button>
+            <h2>Registrar Asistencia</h2>
+            <input type="text" id="alu-id" placeholder="EJ: ALU-001">
+            <button class="btn btn-main" onclick="registrar()">ENVIAR PRESENTE</button>
         </div>
     </div>
 
@@ -43,95 +41,84 @@
         </div>
         
         <div id="panel-qr" class="card">
-            <p>Muestra este QR a los alumnos</p>
             <div id="qr-container"></div>
-            <button class="btn btn-red" onclick="cerrarClase()">FINALIZAR CLASE</button>
+            <button class="btn btn-red" onclick="alert('Función en mantenimiento: Los ausentes se marcan automáticamente al final del día en el Excel.')">FINALIZAR CLASE</button>
         </div>
 
-        <div id="panel-lista" class="card" style="display:none; padding: 10px;">
-            <h3 style="text-align: left; margin: 10px;">Control de Asistencia:</h3>
-            <div id="lista-alumnos"></div>
+        <div id="panel-lista" class="card" style="display:none;">
+            <div id="lista-alumnos">Cargando datos...</div>
         </div>
 
         <div class="nav">
-            <button onclick="tab('qr')" id="btn-qr" class="active">MODO QR</button>
-            <button onclick="tab('lista')" id="btn-lista">VER LISTADO</button>
+            <button onclick="tab('qr')" id="btn-qr" class="active">QR</button>
+            <button onclick="tab('lista')" id="btn-lista">LISTA</button>
         </div>
     </div>
 
 <script>
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyu_pfpQjG0kjfPN-GyCbsiTX3dE1tq89p-YCojsWFWTafYNhMLJtuuQQhYPfPWRhEe/exec';
-    const isAdmin = new URLSearchParams(window.location.search).get('admin') === '123';
+    const isAdmin = window.location.search.includes('admin=123');
     let db = [];
 
-    async function init() {
-        if (isAdmin) {
-            document.getElementById('view-profe').style.display = 'block';
-            const urlLimpia = window.location.href.split('?')[0];
-            new QRCode(document.getElementById("qr-container"), { text: urlLimpia, width: 220, height: 220 });
-        } else {
-            document.getElementById('view-alumno').style.display = 'block';
-        }
-        await cargarDatos();
-    }
-
-    async function cargarDatos() {
+    async function cargar() {
         try {
             const r = await fetch(SCRIPT_URL);
             db = await r.json();
             if(isAdmin) {
                 document.getElementById('count-t').innerText = db.length;
                 document.getElementById('count-p').innerText = db.filter(a => a.estado === 'presente').length;
-                renderLista();
+                render();
             }
-        } catch(e) { console.log("Error de conexión"); }
+        } catch(e) { console.error(e); }
     }
 
-    async function registrar() {
-        const id = document.getElementById('alu-id').value.trim().toUpperCase();
-        const alumno = db.find(a => a.code === id);
-        if(!alumno) return alert("Código ID no reconocido.");
-
-        try {
-            await fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify({
-                    fecha: new Date().toLocaleDateString(),
-                    codigo: id, nombre: alumno.nombre, pc: alumno.pc,
-                    estado: 'Presente', hora: new Date().toLocaleTimeString()
-                })
-            });
-            document.body.innerHTML = "<div class='card' style='margin-top:50px'><h1>✅ Registrado</h1><p>Ya puedes cerrar esta ventana.</p></div>";
-        } catch(e) { alert("Error al conectar"); }
-    }
-
-    function tab(t) {
-        document.getElementById('panel-qr').style.display = t === 'qr' ? 'block' : 'none';
-        document.getElementById('panel-lista').style.display = t === 'lista' ? 'block' : 'none';
-        document.getElementById('btn-qr').classList.toggle('active', t === 'qr');
-        document.getElementById('btn-lista').classList.toggle('active', t === 'lista');
-    }
-
-    function renderLista() {
-        document.getElementById('lista-alumnos').innerHTML = db.map(a => `
+    function render() {
+        const container = document.getElementById('lista-alumnos');
+        if(!db.length) { container.innerHTML = "No hay alumnos cargados"; return; }
+        container.innerHTML = db.map(a => `
             <div class="list-item">
-                <span><b>${a.nombre}</b><br><small style="color:#888">${a.pc}</small></span>
-                <span class="badge" style="background:${a.estado === 'presente' ? '#4ade80':'#333'}; color:${a.estado === 'presente' ? '#000':'#fff'}">
-                    ${a.estado.toUpperCase()}
+                <span><b>${a.nombre}</b><br><small style="color:#888">PC: ${a.pc}</small></span>
+                <span class="badge" style="background:${a.estado === 'presente' ? '#4ade80' : '#333'}; color:${a.estado === 'presente' ? '#000' : '#fff'}">
+                    ${a.estado}
                 </span>
             </div>
         `).join('');
     }
 
-    function cerrarClase() {
-        if(confirm("¿Quieres finalizar la clase y marcar a los ausentes?")) {
-            alert("Procesando ausentes en Google Sheets...");
-        }
+    async function registrar() {
+        const id = document.getElementById('alu-id').value.trim().toUpperCase();
+        const alu = db.find(x => x.code === id);
+        if(!alu) return alert("ID no encontrado");
+
+        await fetch(SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify({
+                fecha: new Date().toLocaleDateString(),
+                codigo: id, nombre: alu.nombre, pc: alu.pc,
+                estado: 'Presente', hora: new Date().toLocaleTimeString()
+            })
+        });
+        alert("¡Asistencia enviada!");
+        location.reload();
     }
 
-    init();
-    if(isAdmin) setInterval(cargarDatos, 10000); // Auto-recarga cada 10 segundos para el profe
+    function tab(t) {
+        document.getElementById('panel-qr').style.display = t === 'qr' ? 'block' : 'none';
+        document.getElementById('panel-lista').style.display = t === 'lista' ? 'block' : 'none';
+        document.getElementById('btn-qr').className = t === 'qr' ? 'active' : '';
+        document.getElementById('btn-lista').className = t === 'lista' ? 'active' : '';
+    }
+
+    if(isAdmin) {
+        document.getElementById('view-profe').style.display = 'block';
+        new QRCode(document.getElementById("qr-container"), { text: window.location.href.split('?')[0], width: 220, height: 220 });
+    } else {
+        document.getElementById('view-alumno').style.display = 'block';
+    }
+
+    cargar();
+    if(isAdmin) setInterval(cargar, 15000); // Actualiza cada 15 seg
 </script>
 </body>
 </html>
