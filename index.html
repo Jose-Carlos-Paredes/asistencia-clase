@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Asistencia — Panel del Profesor</title>
+<title>Asistencia — Panel de Control</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
@@ -48,96 +48,51 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .tab-btn{flex:1;padding:7px 6px;font-size:11px;font-family:var(--mono);cursor:pointer;border:none;background:transparent;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;transition:all .15s}
 .tab-btn.active{background:var(--accent);color:#000;font-weight:500}
 
+/* QR */
+.qr-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;padding:8px 0}
+#qr-container{background:#fff;padding:14px;border:3px solid var(--accent)}
+#qr-container img, #qr-container canvas{display:block}
+.session-code{font-family:var(--mono);font-size:12px;color:var(--accent);background:var(--surface2);padding:10px;border:1px solid var(--border);width:100%;word-break:break-all;text-align:center}
+
 /* CARDS */
 .card{background:var(--surface);border:1px solid var(--border);padding:18px;margin-bottom:12px}
 .card-title{font-size:10px;font-family:var(--mono);color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px}
 .card-title::before{content:'';width:6px;height:6px;background:var(--accent);display:inline-block}
 
-/* QR */
-.qr-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;padding:8px 0}
-#qr-container{background:#fff;padding:14px;border:3px solid var(--accent)}
-#qr-container img, #qr-container canvas{display:block}
-.session-code{font-family:var(--mono);font-size:22px;font-weight:500;letter-spacing:0.15em;color:var(--accent);background:var(--surface2);padding:10px 24px;border:1px solid var(--border)}
-.qr-hint{font-size:12px;color:var(--muted);text-align:center;font-family:var(--mono);max-width:280px;line-height:1.6}
-
 /* BUTTONS */
 .btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 18px;font-size:13px;font-weight:500;cursor:pointer;border:none;font-family:var(--sans);transition:all .15s;width:100%}
 .btn-accent{background:var(--accent);color:#000}
-.btn-accent:hover{background:#d4eb3f}
 .btn-danger{background:var(--red);color:#000}
-.btn-danger:hover{opacity:0.85}
 .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
-.btn-outline:hover{border-color:var(--muted)}
-.btn-sm{padding:7px 14px;font-size:12px;width:auto;font-family:var(--mono)}
 .btn:disabled{opacity:0.4;cursor:not-allowed}
-
-/* TABLE */
-table{width:100%;border-collapse:collapse;font-size:12px}
-th{text-align:left;font-size:10px;font-family:var(--mono);color:var(--muted);padding:7px 8px;border-bottom:1px solid var(--border);letter-spacing:0.08em;text-transform:uppercase}
-td{padding:10px 8px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
-tr:last-child td{border-bottom:none}
-tr:hover td{background:rgba(255,255,255,0.02)}
-.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:0.06em}
-.badge-green{background:rgba(74,222,128,0.12);color:var(--green);border:1px solid rgba(74,222,128,0.25)}
-.badge-red{background:rgba(248,113,113,0.12);color:var(--red);border:1px solid rgba(248,113,113,0.25)}
-.badge-gray{background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
-
-/* INPUTS */
-input[type=text]{width:100%;padding:10px 12px;font-size:14px;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--sans);outline:none;transition:border .15s}
-input[type=text]:focus{border-color:var(--accent)}
-input::placeholder{color:var(--muted)}
-
-/* ALERT */
-.alert{padding:12px 14px;font-size:13px;margin-bottom:12px;display:none;border-left:3px solid}
-.alert.show{display:flex;align-items:flex-start;gap:10px}
-.alert-s{background:rgba(74,222,128,0.08);border-color:var(--green);color:var(--green)}
-.alert-d{background:rgba(248,113,113,0.08);border-color:var(--red);color:var(--red)}
-.alert-w{background:rgba(232,255,71,0.08);border-color:var(--accent);color:var(--accent)}
-.alert-body .at{font-weight:600;font-size:13px}
-.alert-body .as{font-size:12px;margin-top:2px;opacity:0.8;font-family:var(--mono)}
-
-/* HORARIO */
-.hor-item{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--border)}
-.hor-item:last-child{border-bottom:none}
-.hor-mod{font-family:var(--mono);font-size:13px;font-weight:500}
-.hor-hrs{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:2px}
-.mod-active{background:var(--accent);color:#000;padding:3px 10px;font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:0.08em}
-.mod-inactive{background:var(--surface2);color:var(--muted);padding:3px 10px;font-family:var(--mono);font-size:10px;letter-spacing:0.08em}
 
 /* SYNC STATUS */
 .sync-bar{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);margin-bottom:12px;font-family:var(--mono);font-size:11px;color:var(--muted)}
-.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--muted);flex-shrink:0}
-.sync-dot.ok{background:var(--green);box-shadow:0 0 6px rgba(74,222,128,0.5)}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--muted)}
+.sync-dot.ok{background:var(--green);box-shadow:0 0 5px var(--green)}
 .sync-dot.syncing{background:var(--accent);animation:pulse 1s infinite}
 .sync-dot.err{background:var(--red)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
 
-/* ALUMNO SCREEN */
-.alu-hero{text-align:center;padding:24px 0 16px}
-.alu-icon{font-size:48px;margin-bottom:12px}
-.alu-title{font-size:20px;font-weight:600;color:var(--text)}
-.alu-sub{font-size:13px;color:var(--muted);margin-top:4px;font-family:var(--mono)}
-.success-wrap{text-align:center;padding:20px 0}
-.success-icon{font-size:56px;margin-bottom:16px}
-.success-name{font-size:22px;font-weight:600;color:var(--green);margin-bottom:4px}
-.success-detail{font-family:var(--mono);font-size:12px;color:var(--muted)}
-.success-box{background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.25);padding:14px;margin-top:16px}
-.success-box-text{font-size:13px;color:var(--green);font-weight:500}
-.success-box-sub{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:4px}
+/* TABLE */
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;font-size:10px;font-family:var(--mono);color:var(--muted);padding:7px 8px;border-bottom:1px solid var(--border)}
+td{padding:10px 8px;border-bottom:1px solid var(--border);color:var(--text)}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;font-size:10px;font-family:var(--mono);font-weight:500}
+.badge-green{background:rgba(74,222,128,0.12);color:var(--green);border:1px solid rgba(74,222,128,0.25)}
+.badge-red{background:rgba(248,113,113,0.12);color:var(--red);border:1px solid rgba(248,113,113,0.25)}
+.badge-gray{background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
 
-.row-gap{display:flex;flex-direction:column;gap:8px}
-.flex-row{display:flex;gap:8px;justify-content:flex-end;margin-bottom:10px}
+input[type=text]{width:100%;padding:14px;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:18px;outline:none;text-align:center}
 </style>
 </head>
 <body>
 
-<!-- ══ PANTALLA PROFESOR ══ -->
 <div id="screen-profesor" class="app">
-
   <div class="topbar">
     <div>
-      <div class="app-name">Sistema de asistencia</div>
-      <div class="mod-label" id="mod-label">Detectando módulo...</div>
+      <div class="app-name">Panel de Asistencia</div>
+      <div class="mod-label" id="mod-label">Sincronizando...</div>
     </div>
     <div>
       <div class="clock" id="clock">--:--</div>
@@ -146,10 +101,10 @@ input::placeholder{color:var(--muted)}
   </div>
 
   <div class="stats">
-    <div class="stat"><div class="stat-val val-green" id="s-pres">0</div><div class="stat-lbl">Presentes</div></div>
-    <div class="stat"><div class="stat-val val-red" id="s-aus">—</div><div class="stat-lbl">Ausentes</div></div>
+    <div class="stat"><div class="stat-val val-green" id="s-pres">0</div><div class="stat-lbl">Pres.</div></div>
+    <div class="stat"><div class="stat-val val-red" id="s-aus">—</div><div class="stat-lbl">Aus.</div></div>
     <div class="stat"><div class="stat-val val-blue" id="s-total">0</div><div class="stat-lbl">Total</div></div>
-    <div class="stat"><div class="stat-val val-acc" id="s-pct">0%</div><div class="stat-lbl">Asistencia</div></div>
+    <div class="stat"><div class="stat-val val-acc" id="s-pct">0%</div><div class="stat-lbl">Ratio</div></div>
   </div>
 
   <div class="sync-bar">
@@ -158,392 +113,202 @@ input::placeholder{color:var(--muted)}
   </div>
 
   <div class="tabs">
-    <button class="tab-btn active" onclick="showTab('qr')">QR</button>
-    <button class="tab-btn" onclick="showTab('lista')">Lista</button>
-    <button class="tab-btn" onclick="showTab('alumnos')">Alumnos</button>
-    <button class="tab-btn" onclick="showTab('horario')">Horario</button>
+    <button class="tab-btn active" onclick="showTab('qr')">CÓDIGO QR</button>
+    <button class="tab-btn" onclick="showTab('lista')">LISTADO</button>
+    <button class="tab-btn" onclick="showTab('alumnos')">ALUMNOS</button>
   </div>
 
-  <!-- TAB QR -->
   <div id="tab-qr">
     <div class="card">
-      <div class="card-title">Código QR del día — mostralo a los alumnos</div>
+      <div class="card-title">Escanea para dar el presente</div>
       <div class="qr-wrap">
         <div id="qr-container"></div>
-        <div class="session-code" id="session-code-display"></div>
-        <div class="qr-hint">Los alumnos escanean este QR y registran su presencia desde su celular</div>
+        <div class="session-code" id="url-display">Cargando URL...</div>
       </div>
     </div>
-    <button class="btn btn-danger" id="btn-cerrar" onclick="cerrarClase()">🔒 Cerrar clase y marcar ausentes</button>
+    <button class="btn btn-danger" id="btn-cerrar" onclick="cerrarClase()">🔒 Finalizar Clase y marcar Ausentes</button>
   </div>
 
-  <!-- TAB LISTA -->
   <div id="tab-lista" style="display:none">
     <div class="card">
-      <div class="card-title">Registro de hoy</div>
-      <div class="flex-row">
-        <button class="btn btn-outline btn-sm" onclick="exportCSV()">⬇ Exportar CSV</button>
-        <button class="btn btn-outline btn-sm" onclick="cargarAlumnos()">↺ Actualizar</button>
-      </div>
-      <table><thead><tr><th>Alumno</th><th>PC</th><th>Estado</th><th>Hora</th></tr></thead>
-      <tbody id="lista-body"></tbody></table>
+      <table>
+        <thead><tr><th>Nombre</th><th>PC</th><th>Estado</th></tr></thead>
+        <tbody id="lista-body"></tbody>
+      </table>
     </div>
   </div>
 
-  <!-- TAB ALUMNOS -->
   <div id="tab-alumnos" style="display:none">
     <div class="card">
-      <div class="card-title">Alumnos registrados</div>
-      <table><thead><tr><th>Código</th><th>Nombre</th><th>PC</th></tr></thead>
-      <tbody id="alumnos-body"></tbody></table>
-    </div>
-    <div class="card">
-      <div class="card-title">Agregar alumno</div>
-      <div class="row-gap">
-        <input type="text" id="new-code" placeholder="Código (ej: ALU-021)" />
-        <input type="text" id="new-name" placeholder="Nombre completo" />
-        <input type="text" id="new-pc" placeholder="N° PC (ej: PC-07)" />
-        <button class="btn btn-accent" onclick="addAlumno()">+ Agregar alumno</button>
-      </div>
+      <table>
+        <thead><tr><th>ID</th><th>Nombre</th><th>PC</th></tr></thead>
+        <tbody id="alumnos-body"></tbody>
+      </table>
     </div>
   </div>
-
-  <!-- TAB HORARIO -->
-  <div id="tab-horario" style="display:none">
-    <div class="card">
-      <div class="card-title">Horario de la materia</div>
-      <div id="horario-list"></div>
-    </div>
-  </div>
-
 </div>
 
-<!-- ══ PANTALLA ALUMNO ══ -->
 <div id="screen-alumno" class="app" style="display:none">
-
-  <div class="topbar">
-    <div>
-      <div class="app-name">Registro de asistencia</div>
-      <div class="mod-label" id="alu-mod-label">—</div>
-    </div>
-    <button class="btn btn-outline btn-sm" onclick="volverProfesor()" style="width:auto;margin-top:4px">← Profe</button>
-  </div>
-
-  <div id="alert-alu"></div>
-
-  <!-- FORM ALUMNO -->
   <div id="alu-form-box">
-    <div class="card">
-      <div class="alu-hero">
-        <div class="alu-icon">📱</div>
-        <div class="alu-title">Registrá tu asistencia</div>
-        <div class="alu-sub" id="alu-fecha-label"></div>
-      </div>
+    <div class="card" style="text-align:center; padding:40px 20px">
+      <div style="font-size:50px; margin-bottom:20px">📱</div>
+      <h2 style="margin-bottom:10px">Registra tu Asistencia</h2>
+      <p id="alu-fecha" style="color:var(--muted); font-size:14px"></p>
     </div>
     <div class="card">
-      <div class="card-title">Ingresá tu código de alumno</div>
-      <div class="row-gap">
-        <input type="text" id="alu-code-input" placeholder="Ej: ALU-001"
-          style="text-transform:uppercase;font-size:20px;text-align:center;font-weight:600;letter-spacing:0.1em;font-family:var(--mono)"
-          onkeydown="if(event.key==='Enter') registrarAlumno()" />
-        <button class="btn btn-accent" onclick="registrarAlumno()">✅ Registrar presente</button>
-      </div>
-      <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:10px;font-family:var(--mono)">Tu código está impreso en tu tarjeta o en tu computadora</div>
+      <div class="card-title">Ingresa tu código de alumno</div>
+      <input type="text" id="alu-input" placeholder="ALU-000" style="text-transform:uppercase" />
+      <button class="btn btn-accent" style="margin-top:15px" onclick="enviarPresente()">REGISTRAR PRESENTE</button>
     </div>
   </div>
 
-  <!-- ÉXITO ALUMNO -->
-  <div id="alu-success-box" style="display:none">
-    <div class="card">
-      <div class="success-wrap">
-        <div class="success-icon">✅</div>
-        <div class="success-name" id="alu-success-name"></div>
-        <div class="success-detail" id="alu-success-detail"></div>
-        <div class="success-box">
-          <div class="success-box-text">Presente registrado en Google Sheets</div>
-          <div class="success-box-sub" id="alu-success-hora"></div>
-        </div>
-      </div>
-    </div>
-    <button class="btn btn-outline" onclick="nuevoRegistro()">Registrar otro alumno</button>
+  <div id="alu-success" style="display:none; text-align:center" class="card">
+    <div style="font-size:60px; color:var(--green)">✅</div>
+    <h2 id="success-name" style="margin:15px 0"></h2>
+    <p style="color:var(--muted)">Tu asistencia ha sido registrada exitosamente en Google Sheets.</p>
+    <button class="btn btn-outline" style="margin-top:20px" onclick="location.reload()">Volver</button>
   </div>
-
 </div>
 
-<!-- BOTÓN DEMO -->
-<div style="position:fixed;bottom:16px;right:16px;z-index:999">
-  <button onclick="simularEscaneo()" style="background:var(--blue,#60a5fa);color:#000;border:none;padding:10px 16px;font-size:12px;font-family:'DM Mono',monospace;font-weight:500;cursor:pointer;letter-spacing:0.06em">
-    📱 VER PANTALLA ALUMNO
-  </button>
+<div style="position:fixed; bottom:20px; right:20px">
+  <button onclick="cambiarVista()" class="btn btn-outline btn-sm" style="background:#1a1a1a; font-size:10px">CAMBIAR MODO (PROFE/ALUMNO)</button>
 </div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxLiGtEY_nrL7tKJs5OpEFjmBy4DYQDA2WW-5w6rSL65JXLpWD0OTjyjILOdX57VbkU/exec';
-
-const HORARIO = [
-  {mod:"1°",inicio:"07:30",fin:"08:20"},
-  {mod:"2°",inicio:"08:20",fin:"09:10"},
-  {mod:"3°",inicio:"09:10",fin:"10:00"},
-  {mod:"4°",inicio:"10:00",fin:"10:50"},
-  {mod:"Recreo",inicio:"10:50",fin:"11:10"},
-  {mod:"5°",inicio:"11:10",fin:"12:00"},
-  {mod:"6°",inicio:"12:00",fin:"12:50"},
-];
+// --- URL DE TU SCRIPT ---
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyu_pfpQjG0kjfPN-GyCbsiTX3dE1tq89p-YCojsWFWTafYNhMLJtuuQQhYPfPWRhEe/exec';
 
 let alumnos = [];
-let asistenciaHoy = {};
-let claseCerrada = false;
-let sessionCode = '';
-
-// ── UTILS ──
-function getModulo(){
-  const now = new Date();
-  const hm = now.getHours()*60+now.getMinutes();
-  for(const h of HORARIO){
-    const [ih,im]=h.inicio.split(':').map(Number);
-    const [fh,fm]=h.fin.split(':').map(Number);
-    if(hm>=ih*60+im&&hm<fh*60+fm) return h;
-  }
-  return null;
-}
+let asistencia = {};
+let cerrada = false;
 
 function tick(){
   const now = new Date();
   document.getElementById('clock').textContent = now.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
-  const dias=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-  const meses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  document.getElementById('date-label').textContent = `${dias[now.getDay()]} ${now.getDate()} ${meses[now.getMonth()]}`;
-  const mod = getModulo();
-  const lbl = mod?`Módulo ${mod.mod} · ${mod.inicio}–${mod.fin}`:'Fuera de horario';
-  document.getElementById('mod-label').textContent = lbl;
-  document.getElementById('alu-mod-label').textContent = lbl;
+  document.getElementById('date-label').textContent = now.toLocaleDateString('es-AR',{weekday:'long', day:'numeric'});
+  document.getElementById('alu-fecha').textContent = now.toLocaleDateString('es-AR',{weekday:'long', day:'numeric', month:'long'});
 }
 
-function setSyncStatus(status, msg){
-  const dot = document.getElementById('sync-dot');
-  const lbl = document.getElementById('sync-label');
-  dot.className = 'sync-dot ' + status;
-  lbl.textContent = msg;
-}
-
-// ── CARGAR ALUMNOS DESDE SHEETS ──
-async function cargarAlumnos(){
-  setSyncStatus('syncing','Cargando alumnos desde Google Sheets...');
+async function fetchAlumnos(){
+  setStatus('syncing','Cargando datos...');
   try {
-    const res = await fetch(SCRIPT_URL);
-    const data = await res.json();
-    if(Array.isArray(data) && data.length > 0){
-      alumnos = data;
-      alumnos.forEach(a=>{
-        if(!asistenciaHoy[a.code]) asistenciaHoy[a.code]={estado:'pendiente',hora:null};
-      });
-      setSyncStatus('ok', `${alumnos.length} alumnos cargados · Google Sheets conectado ✓`);
-    } else {
-      setSyncStatus('ok','Google Sheets conectado · Sin alumnos aún');
-    }
-    updateStats();
-    renderLista();
+    const r = await fetch(SCRIPT_URL);
+    alumnos = await r.json();
+    alumnos.forEach(a => asistencia[a.code] = {estado:'pendiente', hora:'--'});
     renderAlumnos();
-  } catch(e){
-    setSyncStatus('err','Error al conectar con Google Sheets');
+    renderLista();
+    updateStats();
+    setStatus('ok','Sincronizado con Google Sheets ✓');
+  } catch(e) {
+    setStatus('err','Error de conexión con el Script');
   }
 }
 
-// ── GUARDAR ASISTENCIA EN SHEETS ──
-async function guardarEnSheets(alumno, estado, hora){
-  const now = new Date();
-  const fecha = now.toLocaleDateString('es-AR');
-  const payload = {
-    fecha, codigo: alumno.code,
-    nombre: alumno.nombre, pc: alumno.pc,
-    estado, hora
-  };
+async function enviarPresente(){
+  const id = document.getElementById('alu-input').value.trim().toUpperCase();
+  const a = alumnos.find(x => x.code === id);
+  
+  if(!a) return alert('ID no encontrado en la lista.');
+  if(asistencia[id].estado === 'presente') return alert('Ya has marcado presente hoy.');
+
+  setStatus('syncing','Guardando...');
+  const hora = new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+  
   try {
     await fetch(SCRIPT_URL, {
-      method:'POST',
-      body: JSON.stringify(payload),
-      headers:{'Content-Type':'application/json'}
+      method: 'POST',
+      body: JSON.stringify({
+        fecha: new Date().toLocaleDateString('es-AR'),
+        codigo: id, nombre: a.nombre, pc: a.pc,
+        estado: 'Presente', hora: hora
+      })
     });
-    setSyncStatus('ok', `Guardado en Sheets · ${hora}`);
-  } catch(e){
-    setSyncStatus('err','Error al guardar en Google Sheets');
+    
+    asistencia[id] = {estado:'presente', hora: hora};
+    document.getElementById('alu-form-box').style.display = 'none';
+    document.getElementById('alu-success').style.display = 'block';
+    document.getElementById('success-name').textContent = '¡Hola, ' + a.nombre + '!';
+    updateStats();
+    renderLista();
+    setStatus('ok','Asistencia enviada');
+  } catch(e) {
+    alert('Error al conectar. Revisa tu internet.');
+    setStatus('err','Error al guardar');
   }
 }
 
-// ── INIT ──
-function initSession(){
-  const now = new Date();
-  sessionCode = 'ASIST-' + now.getFullYear().toString().slice(-2) + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0');
-  document.getElementById('session-code-display').textContent = sessionCode;
-  document.getElementById('alu-fecha-label').textContent = now.toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'});
-  const container = document.getElementById('qr-container');
-  container.innerHTML = '';
-  new QRCode(container, {
-    text: sessionCode, width:180, height:180,
-    colorDark:'#000000', colorLight:'#ffffff',
-    correctLevel: QRCode.CorrectLevel.H
-  });
-  renderHorario();
-  cargarAlumnos();
-}
-
-// ── REGISTRAR ALUMNO ──
-async function registrarAlumno(){
-  if(claseCerrada){ showAluAlert('d','Clase cerrada','El profesor ya cerró la asistencia de hoy.'); return; }
-  const code = document.getElementById('alu-code-input').value.trim().toUpperCase();
-  if(!code){ showAluAlert('w','Código vacío','Ingresá tu código de alumno.'); return; }
-  const alumno = alumnos.find(a=>a.code===code);
-  if(!alumno){ showAluAlert('d','Código no encontrado',`"${code}" no está en el listado. Verificá tu código.`); return; }
-  if(asistenciaHoy[code]?.estado==='presente'){
-    showAluAlert('w','Ya registrado',`${alumno.nombre} ya tiene el presente registrado.`); return;
-  }
-  const hora = new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
-  asistenciaHoy[code]={estado:'presente',hora};
-  setSyncStatus('syncing','Guardando en Google Sheets...');
-  await guardarEnSheets(alumno,'presente',hora);
-  document.getElementById('alu-form-box').style.display='none';
-  document.getElementById('alu-success-box').style.display='block';
-  document.getElementById('alu-success-name').textContent = alumno.nombre;
-  document.getElementById('alu-success-detail').textContent = `${alumno.pc} · ${alumno.code}`;
-  document.getElementById('alu-success-hora').textContent = `Hora de ingreso: ${hora}`;
-  updateStats();
-  renderLista();
-}
-
-// ── CERRAR CLASE ──
 async function cerrarClase(){
-  if(claseCerrada){ return; }
-  if(!confirm('¿Cerrar la clase? Los alumnos que no escanearon quedarán como AUSENTES en Google Sheets.')) return;
-  claseCerrada = true;
-  const ausentes = alumnos.filter(a=>asistenciaHoy[a.code]?.estado!=='presente');
-  setSyncStatus('syncing',`Guardando ${ausentes.length} ausentes en Sheets...`);
-  for(const a of ausentes){
-    asistenciaHoy[a.code]={estado:'ausente',hora:null};
-    await guardarEnSheets(a,'ausente','—');
+  if(!confirm('¿Cerrar asistencia? Los que no marcaron quedarán como AUSENTES.')) return;
+  cerrada = true;
+  setStatus('syncing','Marcando ausentes...');
+  
+  const faltan = alumnos.filter(x => asistencia[x.code].estado === 'pendiente');
+  for(const f of faltan){
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        fecha: new Date().toLocaleDateString('es-AR'),
+        codigo: f.code, nombre: f.nombre, pc: f.pc,
+        estado: 'Ausente', hora: '--'
+      })
+    });
+    asistencia[f.code].estado = 'ausente';
   }
-  setSyncStatus('ok',`Clase cerrada · ${ausentes.length} ausentes guardados en Sheets ✓`);
+  
+  document.getElementById('btn-cerrar').disabled = true;
+  document.getElementById('btn-cerrar').textContent = '🔒 CLASE CERRADA';
   updateStats();
   renderLista();
-  const btn = document.getElementById('btn-cerrar');
-  btn.textContent='🔒 Clase cerrada';
-  btn.disabled=true;
+  setStatus('ok','Clase cerrada exitosamente');
 }
 
-// ── STATS ──
-function updateStats(){
-  const pres = Object.values(asistenciaHoy).filter(v=>v.estado==='presente').length;
-  const aus = claseCerrada ? Object.values(asistenciaHoy).filter(v=>v.estado==='ausente').length : '—';
-  const total = alumnos.length;
-  document.getElementById('s-pres').textContent = pres;
-  document.getElementById('s-aus').textContent = aus;
-  document.getElementById('s-total').textContent = total;
-  document.getElementById('s-pct').textContent = total>0?Math.round(pres/total*100)+'%':'0%';
-}
-
-// ── RENDER ──
-function renderLista(){
-  document.getElementById('lista-body').innerHTML = alumnos.map(a=>{
-    const r = asistenciaHoy[a.code];
-    const estado = r?.estado||'pendiente';
-    const cls = estado==='presente'?'badge-green':estado==='ausente'?'badge-red':'badge-gray';
-    const lbl = estado==='presente'?'✓ PRESENTE':estado==='ausente'?'✗ AUSENTE':'— PENDIENTE';
-    return `<tr><td>${a.nombre}</td><td style="font-family:var(--mono);font-size:11px">${a.pc||'—'}</td><td><span class="badge ${cls}">${lbl}</span></td><td style="font-family:var(--mono);font-size:11px;color:var(--muted)">${r?.hora||'—'}</td></tr>`;
-  }).join('');
+function setStatus(s, m){
+  document.getElementById('sync-dot').className = 'sync-dot ' + s;
+  document.getElementById('sync-label').textContent = m;
 }
 
 function renderAlumnos(){
-  document.getElementById('alumnos-body').innerHTML = alumnos.map(a=>`
-    <tr>
-      <td style="font-family:var(--mono);font-size:11px;color:var(--muted)">${a.code}</td>
-      <td>${a.nombre}</td>
-      <td style="font-family:var(--mono);font-size:11px">${a.pc||'—'}</td>
-    </tr>`).join('');
+  document.getElementById('alumnos-body').innerHTML = alumnos.map(a => `<tr><td>${a.code}</td><td>${a.nombre}</td><td>${a.pc}</td></tr>`).join('');
 }
 
-function renderHorario(){
-  const now = new Date();
-  const hm = now.getHours()*60+now.getMinutes();
-  document.getElementById('horario-list').innerHTML = HORARIO.map(h=>{
-    const [ih,im]=h.inicio.split(':').map(Number);
-    const [fh,fm]=h.fin.split(':').map(Number);
-    const activo = hm>=ih*60+im&&hm<fh*60+fm;
-    return `<div class="hor-item">
-      <div><div class="hor-mod">Módulo ${h.mod}</div><div class="hor-hrs">${h.inicio} – ${h.fin}</div></div>
-      <span class="${activo?'mod-active':'mod-inactive'}">${activo?'EN CURSO':'—'}</span>
-    </div>`;
+function renderLista(){
+  document.getElementById('lista-body').innerHTML = alumnos.map(a => {
+    const r = asistencia[a.code];
+    const b = r.estado==='presente'?'badge-green':r.estado==='ausente'?'badge-red':'badge-gray';
+    return `<tr><td>${a.nombre}</td><td>${a.pc}</td><td><span class="badge ${b}">${r.estado.toUpperCase()}</span></td></tr>`;
   }).join('');
 }
 
-// ── ADD ALUMNO ──
-function addAlumno(){
-  const code = document.getElementById('new-code').value.trim().toUpperCase();
-  const nombre = document.getElementById('new-name').value.trim();
-  const pc = document.getElementById('new-pc').value.trim().toUpperCase();
-  if(!code||!nombre||!pc){ alert('Completá todos los campos.'); return; }
-  if(alumnos.find(a=>a.code===code)){ alert('Ese código ya existe.'); return; }
-  alumnos.push({code,nombre,pc});
-  asistenciaHoy[code]={estado:'pendiente',hora:null};
-  document.getElementById('new-code').value='';
-  document.getElementById('new-name').value='';
-  document.getElementById('new-pc').value='';
-  updateStats(); renderLista(); renderAlumnos();
+function updateStats(){
+  const p = Object.values(asistencia).filter(x => x.estado==='presente').length;
+  document.getElementById('s-pres').textContent = p;
+  document.getElementById('s-total').textContent = alumnos.length;
+  document.getElementById('s-pct').textContent = alumnos.length ? Math.round((p/alumnos.length)*100)+'%' : '0%';
+  if(cerrada) document.getElementById('s-aus').textContent = alumnos.length - p;
 }
 
-// ── TABS ──
-function showTab(tab){
-  ['qr','lista','alumnos','horario'].forEach(t=>{
-    document.getElementById('tab-'+t).style.display=t===tab?'block':'none';
-  });
-  document.querySelectorAll('.tab-btn').forEach((b,i)=>{
-    b.classList.toggle('active',['qr','lista','alumnos','horario'][i]===tab);
-  });
+function showTab(t){
+  ['qr','lista','alumnos'].forEach(x => document.getElementById('tab-'+x).style.display = x===t?'block':'none');
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.innerText.toLowerCase().includes(t)));
 }
 
-// ── NAVEGACIÓN ──
-function simularEscaneo(){
-  document.getElementById('screen-profesor').style.display='none';
-  document.getElementById('screen-alumno').style.display='block';
-  document.getElementById('alu-form-box').style.display='block';
-  document.getElementById('alu-success-box').style.display='none';
-  document.getElementById('alu-code-input').value='';
-  tick();
+function cambiarVista(){
+  const p = document.getElementById('screen-profesor');
+  const a = document.getElementById('screen-alumno');
+  p.style.display = p.style.display==='none'?'block':'none';
+  a.style.display = a.style.display==='none'?'block':'none';
 }
 
-function volverProfesor(){
-  document.getElementById('screen-alumno').style.display='none';
-  document.getElementById('screen-profesor').style.display='block';
+function initQR(){
+  const url = window.location.href;
+  document.getElementById('url-display').textContent = url;
+  new QRCode(document.getElementById("qr-container"), { text: url, width: 200, height: 200 });
 }
 
-function nuevoRegistro(){
-  document.getElementById('alu-form-box').style.display='block';
-  document.getElementById('alu-success-box').style.display='none';
-  document.getElementById('alu-code-input').value='';
-  document.getElementById('alert-alu').innerHTML='';
-}
-
-function showAluAlert(type,title,sub){
-  const box=document.getElementById('alert-alu');
-  const cls=type==='s'?'alert-s':type==='d'?'alert-d':'alert-w';
-  box.innerHTML=`<div class="alert ${cls} show"><div class="alert-body"><div class="at">${title}</div><div class="as">${sub}</div></div></div>`;
-  setTimeout(()=>{ box.innerHTML=''; },4000);
-}
-
-function exportCSV(){
-  const hoy=new Date().toLocaleDateString('es-AR');
-  let csv='Código,Nombre,Computadora,Estado,Hora\n';
-  alumnos.forEach(a=>{
-    const r=asistenciaHoy[a.code];
-    csv+=`${a.code},"${a.nombre}",${a.pc||''},${r?.estado||'pendiente'},${r?.hora||''}\n`;
-  });
-  const blob=new Blob([csv],{type:'text/csv'});
-  const url=URL.createObjectURL(blob);
-  const link=document.createElement('a');
-  link.href=url;link.download=`asistencia_${hoy.replace(/\//g,'-')}.csv`;link.click();
-}
-
-setInterval(tick,1000);
+setInterval(tick, 1000);
 tick();
-initSession();
+initQR();
+fetchAlumnos();
 </script>
 </body>
 </html>
