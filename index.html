@@ -3,231 +3,178 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Asistencia Profe</title>
+<title>Sistema de Asistencia</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
-:root{
-  --bg:#000000;
-  --card:#121212;
-  --border:#282828;
-  --text:#ffffff;
-  --muted:#a0a0a0;
-  --accent:#e8ff47;
-  --green:#4ade80;
-  --red:#f87171;
-}
+:root{ --bg:#000; --card:#121212; --border:#282828; --text:#fff; --muted:#a0a0a0; --accent:#e8ff47; --green:#4ade80; --red:#f87171; }
 *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
 body{background:var(--bg); color:var(--text); font-family:'DM Sans', sans-serif; overflow-x:hidden;}
 
-/* HEADER */
-.header{padding:20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;}
-.status-dot{width:8px; height:8px; border-radius:50%; background:var(--muted); display:inline-block; margin-right:5px;}
+/* INTERFAZ GENERAL */
+.app-container{padding:20px; max-width:500px; margin:0 auto;}
+.card{background:var(--card); border:1px solid var(--border); padding:20px; border-radius:16px; margin-bottom:15px;}
+
+/* VISTA PROFESOR */
+.header-profe{display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;}
+.qr-box{background:white; padding:15px; border-radius:12px; display:inline-block;}
+.qr-box img{width:100% !important; height:auto !important; max-width:220px;}
+.stat-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;}
+.nav-profe{position:fixed; bottom:0; left:0; width:100%; background:#121212; display:flex; border-top:1px solid var(--border); padding:10px 0 20px 0;}
+.nav-btn{flex:1; background:none; border:none; color:var(--muted); font-size:12px;}
+.nav-btn.active{color:var(--accent);}
+
+/* VISTA ALUMNO */
+.input-alu{width:100%; padding:18px; border-radius:12px; border:1px solid var(--border); background:#1a1a1a; color:white; font-size:22px; text-align:center; margin-bottom:15px; font-weight:bold;}
+.btn-alu{background:var(--accent); color:#000; border:none; padding:18px; border-radius:12px; font-weight:700; width:100%; font-size:16px;}
+
+.status-dot{width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:5px;}
 .status-ok{background:var(--green); box-shadow:0 0 8px var(--green);}
-.status-sync{background:var(--accent); animation:pulse 1s infinite;}
-
-/* STATS */
-.stats-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:15px;}
-.stat-card{background:var(--card); border:1px solid var(--border); padding:15px; border-radius:12px; text-align:center;}
-.stat-val{font-size:24px; font-weight:700; display:block;}
-.stat-lbl{font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:1px;}
-
-/* QR SECTION */
-.qr-container-box{background:var(--card); margin:0 15px; padding:25px; border-radius:20px; border:1px solid var(--border); text-align:center;}
-#qr-output{background:white; padding:15px; border-radius:12px; display:inline-block; margin-bottom:15px;}
-#qr-output img{width:100% !important; height:auto !important; max-width:200px;}
-
-/* LISTA */
-.list-container{padding:0 15px 100px 15px;}
-.student-row{background:var(--card); padding:12px 15px; border-radius:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; border:1px solid var(--border);}
-.student-info b{display:block; font-size:14px;}
-.student-info span{font-size:12px; color:var(--muted);}
-.badge{padding:4px 10px; border-radius:6px; font-size:11px; font-weight:700;}
-.bg-pres{background:rgba(74,222,128,0.1); color:var(--green);}
-.bg-pend{background:rgba(160,160,160,0.1); color:var(--muted);}
-
-/* NAV INFERIOR */
-.nav-bar{position:fixed; bottom:0; width:100%; background:rgba(18,18,18,0.95); backdrop-filter:blur(10px); display:flex; border-top:1px solid var(--border); padding:10px 0 25px 0;}
-.nav-item{flex:1; text-align:center; color:var(--muted); font-size:11px; border:none; background:none;}
-.nav-item.active{color:var(--accent);}
-.nav-icon{display:block; font-size:20px; margin-bottom:4px;}
-
-/* BOTONES */
-.btn-main{background:var(--accent); color:black; border:none; padding:15px; border-radius:12px; font-weight:700; width:100%; margin-top:10px;}
-.btn-close{background:rgba(248,113,113,0.1); color:var(--red); border:1px solid var(--red); margin:20px 0; padding:12px; border-radius:10px; width:100%;}
-
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
 </style>
 </head>
 <body>
 
-<div id="view-profe">
-    <div class="header">
-        <div>
-            <h2 style="font-size:18px">Panel Profe</h2>
-            <p style="font-size:12px; color:var(--muted)"><span id="dot" class="status-dot"></span> <span id="sync-msg">Conectando...</span></p>
-        </div>
-        <div style="text-align:right">
-            <span id="clock" style="font-weight:700">--:--</span>
-        </div>
-    </div>
-
-    <div id="content-qr">
-        <div class="stats-grid">
-            <div class="stat-card"><span class="stat-val" style="color:var(--green)" id="count-pres">0</span><span class="stat-lbl">Presentes</span></div>
-            <div class="stat-card"><span class="stat-val" id="count-total">0</span><span class="stat-lbl">Total</span></div>
-        </div>
-        <div class="qr-container-box">
-            <p style="margin-bottom:15px; font-size:14px; font-weight:500">Muestra este código a los alumnos</p>
-            <div id="qr-output"></div>
-            <p id="url-text" style="font-size:10px; color:var(--muted); word-break:break-all"></p>
-        </div>
-        <div style="padding:20px">
-            <button class="btn-close" id="btn-cerrar" onclick="cerrarSesion()">Cerrar Asistencia Hoy</button>
-        </div>
-    </div>
-
-    <div id="content-lista" style="display:none">
-        <div style="padding:20px 15px 10px 15px; display:flex; justify-content:space-between; align-items:center">
-            <h3>Lista de Clase</h3>
-            <button onclick="fetchData()" style="background:none; border:none; color:var(--accent); font-size:12px">Actualizar</button>
-        </div>
-        <div class="list-container" id="list-output">
+<div class="app-container">
+    
+    <div id="view-alumno" style="display:none">
+        <div style="text-align:center; padding:30px 0">
+            <div style="font-size:50px">📝</div>
+            <h2 style="margin-top:10px">Registro de Asistencia</h2>
+            <p id="fecha-alu" style="color:var(--muted); font-size:14px; margin-bottom:30px"></p>
+            
+            <div id="alu-form">
+                <input type="text" id="alu-id" placeholder="TU ID (Ej: ALU-001)" class="input-alu">
+                <button class="btn-alu" onclick="marcarAsistencia()">CONFIRMAR PRESENTE</button>
             </div>
+
+            <div id="alu-success" style="display:none">
+                <div class="card" style="border-color:var(--green)">
+                    <div style="font-size:40px">✅</div>
+                    <h3 id="alu-nombre-ok" style="color:var(--green); margin:10px 0"></h3>
+                    <p>Tu presente ha sido registrado correctamente.</p>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <nav class="nav-bar">
-        <button class="nav-item active" onclick="showTab('qr')"><span class="nav-icon">🔳</span>QR</button>
-        <button class="nav-item" onclick="showTab('lista')"><span class="nav-icon">📋</span>Lista</button>
-        <button class="nav-item" onclick="window.location.reload()"><span class="nav-icon">🔄</span>Recargar</button>
-        <button class="nav-item" onclick="switchToAlumno()"><span class="nav-icon">👤</span>Alumno</button>
-    </nav>
-</div>
+    <div id="view-profe" style="display:none">
+        <div class="header-profe">
+            <h3>Panel Profesor</h3>
+            <span id="clock" style="font-weight:bold">--:--</span>
+        </div>
 
-<div id="view-alumno" style="display:none; padding:40px 20px; text-align:center">
-    <div style="font-size:60px; margin-bottom:20px">📝</div>
-    <h2>Registro de Alumno</h2>
-    <p style="color:var(--muted); margin-bottom:30px">Ingresa tu ID para marcar presente</p>
-    <input type="text" id="alu-id" placeholder="ID ALUMNO" style="width:100%; padding:15px; border-radius:12px; border:1px solid var(--border); background:var(--card); color:white; font-size:20px; text-align:center; margin-bottom:15px">
-    <button class="btn-main" onclick="alumnoMark()">MARCAR PRESENTE</button>
-    <button onclick="location.reload()" style="background:none; border:none; color:var(--muted); margin-top:30px">Volver al Panel Profe</button>
+        <div id="profe-qr" style="text-align:center">
+            <div class="stat-grid">
+                <div class="card">
+                    <span id="p-count" style="font-size:24px; color:var(--green); font-weight:bold">0</span>
+                    <p style="font-size:10px; color:var(--muted)">PRESENTES</p>
+                </div>
+                <div class="card">
+                    <span id="t-count" style="font-size:24px; font-weight:bold">0</span>
+                    <p style="font-size:10px; color:var(--muted)">TOTAL</p>
+                </div>
+            </div>
+            <div class="card">
+                <p style="font-size:12px; margin-bottom:15px; color:var(--muted)">Muestra este QR a la clase:</p>
+                <div class="qr-box" id="qr-dest"></div>
+            </div>
+            <button onclick="cerrarClase()" style="background:none; border:1px solid var(--red); color:var(--red); padding:10px; width:100%; border-radius:10px; font-size:12px">FINALIZAR CLASE</button>
+        </div>
+
+        <div id="profe-lista" style="display:none">
+            <h3>Asistencia en Vivo</h3>
+            <div id="lista-alumnos" style="margin-top:15px"></div>
+        </div>
+
+        <nav class="nav-profe">
+            <button class="nav-btn active" onclick="tab('qr')">MOSTRAR QR</button>
+            <button class="nav-btn" onclick="tab('lista')">VER LISTA</button>
+        </nav>
+    </div>
+
 </div>
 
 <script>
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyu_pfpQjG0kjfPN-GyCbsiTX3dE1tq89p-YCojsWFWTafYNhMLJtuuQQhYPfPWRhEe/exec';
-let db = [];
-let asistencia = {};
+let alumnosDB = [];
+let registroAsistencia = {};
 
-async function fetchData() {
-    updateStatus('sync', 'Sincronizando...');
-    try {
-        const r = await fetch(SCRIPT_URL);
-        db = await r.json();
-        db.forEach(a => { if(!asistencia[a.code]) asistencia[a.code] = {estado:'pend', hora:'--'} });
-        renderList();
-        updateStats();
-        updateStatus('ok', 'Sincronizado');
-    } catch(e) {
-        updateStatus('err', 'Error de red');
+// 1. DETECCIÓN DE ROL (Seguridad)
+const urlParams = new URLSearchParams(window.location.search);
+const isAdmin = urlParams.get('admin') === '123'; // <--- ESTA ES TU LLAVE SECRETA
+
+function iniciarApp() {
+    if (isAdmin) {
+        document.getElementById('view-profe').style.display = 'block';
+        generarQR();
+        fetchDatos();
+    } else {
+        document.getElementById('view-alumno').style.display = 'block';
+        document.getElementById('fecha-alu').innerText = new Date().toLocaleDateString();
+        fetchDatos(); // Cargamos lista para validar IDs
     }
 }
 
-async function alumnoMark() {
+// LÓGICA PROFESOR
+async function fetchDatos() {
+    try {
+        const r = await fetch(SCRIPT_URL);
+        alumnosDB = await r.json();
+        alumnosDB.forEach(a => { if(!registroAsistencia[a.code]) registroAsistencia[a.code] = 'pend'; });
+        actualizarUI();
+    } catch(e) { console.error("Error cargando datos"); }
+}
+
+function generarQR() {
+    const urlLimpia = window.location.href.split('?')[0]; // URL sin la llave admin
+    new QRCode(document.getElementById("qr-dest"), {
+        text: urlLimpia,
+        width: 220,
+        height: 220
+    });
+}
+
+// LÓGICA ALUMNO
+async function marcarAsistencia() {
     const id = document.getElementById('alu-id').value.trim().toUpperCase();
-    const student = db.find(s => s.code === id);
-    if(!student) return alert('ID no encontrado');
+    const alumno = alumnosDB.find(a => a.code === id);
+
+    if (!alumno) return alert("ID no reconocido");
     
-    updateStatus('sync', 'Enviando...');
-    const hora = new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
-    
+    const hora = new Date().toLocaleTimeString();
     try {
         await fetch(SCRIPT_URL, {
             method: 'POST',
             body: JSON.stringify({
-                fecha: new Date().toLocaleDateString('es-AR'),
-                codigo: id, nombre: student.nombre, pc: student.pc,
+                fecha: new Date().toLocaleDateString(),
+                codigo: id, nombre: alumno.nombre, pc: alumno.pc,
                 estado: 'Presente', hora: hora
             })
         });
-        asistencia[id] = {estado:'pres', hora: hora};
-        alert('¡Hecho! Presente registrado.');
-        location.reload();
-    } catch(e) { alert('Error al enviar'); }
+        document.getElementById('alu-form').style.display = 'none';
+        document.getElementById('alu-success').style.display = 'block';
+        document.getElementById('alu-nombre-ok').innerText = "¡Hola, " + alumno.nombre + "!";
+    } catch(e) { alert("Error de conexión"); }
 }
 
-async function cerrarSesion() {
-    if(!confirm('¿Finalizar? Se marcará AUSENTE al resto.')) return;
-    updateStatus('sync', 'Cerrando...');
-    const faltan = db.filter(s => asistencia[s.code].estado === 'pend');
-    for(const s of faltan) {
-        await fetch(SCRIPT_URL, {
-            method: 'POST',
-            body: JSON.stringify({
-                fecha: new Date().toLocaleDateString('es-AR'),
-                codigo: s.code, nombre: s.nombre, pc: s.pc,
-                estado: 'Ausente', hora: '--'
-            })
-        });
-        asistencia[s.code].estado = 'aus';
-    }
-    document.getElementById('btn-cerrar').innerText = 'CLASE FINALIZADA';
-    document.getElementById('btn-cerrar').disabled = true;
-    renderList();
-    updateStats();
-    updateStatus('ok', 'Clase cerrada');
+// UTILIDADES
+function tab(t) {
+    document.getElementById('profe-qr').style.display = t === 'qr' ? 'block' : 'none';
+    document.getElementById('profe-lista').style.display = t === 'lista' ? 'block' : 'none';
 }
 
-function renderList() {
-    const container = document.getElementById('list-output');
-    container.innerHTML = db.map(s => {
-        const st = asistencia[s.code];
-        return `
-            <div class="student-row">
-                <div class="student-info">
-                    <b>${s.nombre}</b>
-                    <span>ID: ${s.code} · PC: ${s.pc}</span>
-                </div>
-                <span class="badge ${st.estado==='pres'?'bg-pres':'bg-pend'}">${st.estado==='pres'?'PRESENTE':'PENDIENTE'}</span>
-            </div>
-        `;
-    }).join('');
+function actualizarUI() {
+    if(!isAdmin) return;
+    const pres = Object.values(registroAsistencia).filter(x => x === 'pres').length;
+    document.getElementById('p-count').innerText = pres;
+    document.getElementById('t-count').innerText = alumnosDB.length;
 }
 
-function updateStats() {
-    const pres = Object.values(asistencia).filter(x => x.estado==='pres').length;
-    document.getElementById('count-pres').innerText = pres;
-    document.getElementById('count-total').innerText = db.length;
-}
+setInterval(() => {
+    document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+}, 1000);
 
-function updateStatus(cl, msg) {
-    const dot = document.getElementById('dot');
-    dot.className = 'status-dot status-' + cl;
-    document.getElementById('sync-msg').innerText = msg;
-}
-
-function showTab(tab) {
-    document.getElementById('content-qr').style.display = tab === 'qr' ? 'block' : 'none';
-    document.getElementById('content-lista').style.display = tab === 'lista' ? 'block' : 'none';
-    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-    event.currentTarget.classList.add('active');
-}
-
-function switchToAlumno() {
-    document.getElementById('view-profe').style.display = 'none';
-    document.getElementById('view-alumno').style.display = 'block';
-}
-
-function init() {
-    const url = window.location.href;
-    document.getElementById('url-text').innerText = url;
-    new QRCode(document.getElementById("qr-output"), { text: url, width: 250, height: 250 });
-    setInterval(() => {
-        document.getElementById('clock').innerText = new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
-    }, 1000);
-    fetchData();
-}
-
-init();
+iniciarApp();
 </script>
 </body>
 </html>
