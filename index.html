@@ -3,130 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Asistencia Profe</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <title>Asistencia: Escáner Profe</title>
+    <script src="https://unpkg.com/html5-qr-scanner@2.3.8/html5-qrcode.min.js"></script>
     <style>
-        :root { --bg: #000; --card: #121212; --accent: #e8ff47; --red: #ff4d4d; }
-        body { background: var(--bg); color: #fff; font-family: sans-serif; margin: 0; padding: 15px; padding-bottom: 100px; }
+        :root { --bg: #000; --card: #121212; --accent: #e8ff47; --green: #4ade80; --red: #ff4d4d; }
+        body { background: var(--bg); color: #fff; font-family: -apple-system, sans-serif; margin: 0; padding: 15px; }
         .card { background: var(--card); border: 1px solid #282828; padding: 20px; border-radius: 16px; text-align: center; margin-bottom: 15px; }
-        .btn { width: 100%; padding: 18px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; }
-        .btn-main { background: var(--accent); color: #000; }
-        .btn-red { background: rgba(255,77,77,0.1); color: var(--red); border: 1px solid var(--red); }
-        input { width: 100%; padding: 18px; border-radius: 12px; border: 1px solid #333; background: #1a1a1a; color: #fff; font-size: 22px; text-align: center; margin: 15px 0; box-sizing: border-box; }
-        .nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #121212; display: flex; padding: 20px 0; border-top: 1px solid #282828; }
-        .nav button { flex: 1; background: none; border: none; color: #666; font-weight: bold; }
-        .nav button.active { color: var(--accent); }
-        .list-item { padding: 15px; border-bottom: 1px solid #222; text-align: left; display: flex; align-items: center; }
-        .pc-badge { background: #333; padding: 4px 8px; border-radius: 6px; font-size: 11px; margin-right: 15px; min-width: 45px; text-align: center; }
+        .stats { display: flex; gap: 10px; margin-bottom: 15px; }
+        .stat-box { flex: 1; background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid #282828; text-align: center;}
+        
+        /* Estilos para el escáner */
+        #qr-reader { border: 2px solid #333 !important; border-radius: 16px; overflow: hidden; background: #000; }
+        #qr-reader__scan_region { background: #000; }
+        #qr-reader__dashboard { border-top: 1px solid #333; padding: 15px !important; }
+        #qr-reader__dashboard_btn { background: var(--accent); color: #000; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        #qr-reader button { background: #333; color: #fff; border: 1px solid #444; padding: 10px; border-radius: 8px; cursor: pointer; margin: 5px; }
+        #qr-reader__camera_selection { background: #222; color: #fff; border: 1px solid #444; padding: 10px; border-radius: 8px; }
+
+        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #222; text-align: left; }
+        .pc-badge { background: #333; padding: 4px 8px; border-radius: 5px; font-size: 10px; margin-right: 10px; min-width: 35px; text-align: center; }
+        .badge { font-size: 10px; padding: 4px 8px; border-radius: 5px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div id="view-alumno" style="display:none">
-        <div class="card">
-            <h2>Asistencia</h2>
-            <input type="text" id="alu-id" placeholder="INGRESAR ID">
-            <button class="btn btn-main" id="btn-env" onclick="registrar()">ENVIAR ASISTENCIA</button>
-        </div>
+    <div class="stats">
+        <div class="stat-box"><b id="count-p" style="color:var(--green); font-size:24px">0</b><br><small>PRESENTES</small></div>
+        <div class="stat-box"><b id="count-t" style="font-size:24px">0</b><br><small>TOTAL</small></div>
     </div>
 
-    <div id="view-profe" style="display:none">
-        <div class="card"><h3 id="txt-total">Cargando...</h3></div>
-        <div id="panel-qr" class="card">
-            <div id="qr-container" style="background:#fff; padding:10px; display:inline-block; border-radius:10px"></div>
-            <button class="btn btn-red" id="btn-fin" onclick="finalizar()">FINALIZAR CLASE</button>
-        </div>
-        <div id="panel-lista" class="card" style="display:none; padding:0"><div id="lista-output"></div></div>
-        <div class="nav">
-            <button onclick="tab('qr')" id="b-qr" class="active">QR</button>
-            <button onclick="tab('lista')" id="b-lista">LISTA</button>
-        </div>
+    <div class="card" style="padding: 10px;">
+        <h3 style="margin-bottom: 10px;">Escáner de Asistencia</h3>
+        <p style="color: #888; font-size: 12px; margin-bottom: 15px;">Apunta la cámara al código QR del alumno</p>
+        <div id="qr-reader"></div>
+    </div>
+
+    <div class="card" id="status-card" style="display: none; border-color: var(--green);">
+        <h4 id="status-msg" style="margin: 0; color: var(--green);">Último: Juan Pérez (PC 15)</h4>
+    </div>
+
+    <div class="card" style="padding: 10px;">
+        <h3 style="text-align: left; margin: 10px;">Listado de Clase</h3>
+        <div id="lista-output">Cargando base de datos...</div>
     </div>
 
 <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwfrZmD_zNz2be9rgkeEPz-U-EpAUMFx3jTsIFCS8mgaPAOCfjfKMJ3VMsCPcdJvcq4/exec';
-    const isAdmin = window.location.search.includes('admin=123');
+    const SCRIPT_URL = 'TU_URL_DE_GOOGLE_APPS_SCRIPT_AQUI'; // <--- PEGA TU URL AQUÍ
     let db = [];
+    let yaRegistradosHoy = new Set(); // Para llevar la cuenta localmente
+    let isScanning = true;
 
+    // Formato de fecha para enviar y comparar: d/M/yyyy
     function getFecha() {
         const d = new Date();
-        return d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear();
+        return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
     }
 
-    async function cargar() {
+    // Cargar la base de datos de alumnos
+    async function cargarBD() {
         try {
-            const r = await fetch(SCRIPT_URL + '?t=' + Date.now());
-            db = await r.json();
-            if(isAdmin) {
-                document.getElementById('txt-total').innerText = "Alumnos: " + db.length;
-                document.getElementById('lista-output').innerHTML = db.map(a => `
-                    <div class="list-item"><span class="pc-badge">PC ${a.pc}</span><span>${a.nombre}</span></div>
-                `).join('');
-            }
-        } catch(e) { setTimeout(cargar, 3000); }
+            const resp = await fetch(SCRIPT_URL);
+            db = await resp.json();
+            document.getElementById('count-t').innerText = db.length;
+            renderLista();
+        } catch(e) {
+            document.getElementById('lista-output').innerText = "Error cargando alumnos. Revisa el Apps Script.";
+        }
     }
 
-    async function registrar() {
-        const idVal = document.getElementById('alu-id').value.trim().toUpperCase();
-        const alu = db.find(x => x.code === idVal);
-        if(!alu) return alert("ID no válido");
+    // Dibujar la lista de alumnos
+    function renderLista() {
+        const listaOut = document.getElementById('lista-output');
+        listaOut.innerHTML = db.map(a => `
+            <div class="list-item">
+                <span><b>${a.nombre}</b><br><small style="color:#777">ID: ${a.code}</small></span>
+                <span class="badge" id="badge-${a.code}" style="background:#333; color:#fff">PENDIENTE</span>
+            </div>
+        `).join('');
+    }
+
+    // --- FUNCIÓN PRINCIPAL: REGISTRAR EL ESCANEO ---
+    async function registrarEscaneo(decodedText, decodedResult) {
+        if (!isScanning) return; // Evitar escaneos múltiples por segundo
+        const idAlumno = decodedText.trim().toUpperCase();
         
-        const btn = document.getElementById('btn-env');
-        btn.disabled = true; btn.innerText = "VERIFICANDO...";
+        // 1. Buscamos el alumno en la base de datos local
+        const alumno = db.find(x => x.code === idAlumno);
+        if (!alumno) {
+            showStatus("⚠️ ID no reconocido: " + idAlumno, "var(--red)");
+            return;
+        }
 
+        // 2. Revisamos si ya lo escaneamos en esta sesión
+        if (yaRegistradosHoy.has(idAlumno)) {
+            showStatus("⚠️ " + alumno.nombre + " ya está presente.", "var(--red)");
+            return;
+        }
+
+        // Bloqueamos escáner momentáneamente
+        isScanning = false;
+        showStatus("Procesando: " + alumno.nombre + "...", "var(--accent)");
+
+        // 3. Enviamos a Google Sheets
         try {
-            const resp = await fetch(SCRIPT_URL, {
+            const response = await fetch(SCRIPT_URL, {
                 method: 'POST',
                 body: JSON.stringify({
                     fecha: getFecha(),
-                    codigo: alu.code, 
-                    nombre: alu.nombre, 
-                    pc: alu.pc,
-                    estado: 'Presente', 
+                    codigo: alumno.code,
+                    nombre: alumno.nombre,
+                    pc: alumno.pc,
                     hora: new Date().toLocaleTimeString('es-AR')
                 })
             });
 
-            const res = await resp.json();
+            const res = await response.json();
 
             if (res.status === "error") {
-                alert("⚠️ Error: Ya registraste tu presencia hoy.");
+                // Google Sheets dice que ya estaba
+                yaRegistradosHoy.add(idAlumno);
+                marcarComoPresenteEnLista(idAlumno);
+                showStatus("⚠️ " + alumno.nombre + " ya estaba registrado.", "var(--red)");
             } else {
-                alert("✅ ¡Asistencia registrada!");
-                document.getElementById('alu-id').value = "";
+                // Éxito total
+                yaRegistradosHoy.add(idAlumno);
+                marcarComoPresenteEnLista(idAlumno);
+                showStatus("✅ ¡" + alumno.nombre + " Presente!", "var(--green)");
+                // Feedback sonoro opcional si lo deseas
+                playSuccessSound(); 
             }
         } catch(e) {
-            alert("⚠️ Error de conexión. Intenta de nuevo.");
+            showStatus("Error de red. Intenta de nuevo.", "var(--red)");
         }
-        btn.disabled = false; btn.innerText = "ENVIAR ASISTENCIA";
+        
+        // Desbloqueamos escáner en 1.5 segundos
+        setTimeout(() => { isScanning = true; }, 1500);
     }
 
-    async function finalizar() {
-        if(!confirm("¿Cerrar clase?")) return;
-        const btn = document.getElementById('btn-fin');
-        btn.disabled = true; btn.innerText = "MARCANDO AUSENTES...";
-        await fetch(SCRIPT_URL, {
-            method: 'POST',
-            body: JSON.stringify({ action: "finalizar", fecha: getFecha() })
+    // --- FUNCIONES AUXILIARES DE LA INTERFAZ ---
+    function showStatus(msg, color) {
+        const card = document.getElementById('status-card');
+        const text = document.getElementById('status-msg');
+        card.style.display = 'block';
+        card.style.borderColor = color;
+        text.innerText = msg;
+        text.style.color = color;
+    }
+
+    function marcarComoPresenteEnLista(id) {
+        // Actualizamos el badge en la lista
+        const badge = document.getElementById(`badge-${id}`);
+        if(badge) {
+            badge.style.background = "var(--green)";
+            badge.style.color = "#000";
+            badge.innerText = "PRESENTE";
+        }
+        // Actualizamos el contador
+        document.getElementById('count-p').innerText = yaRegistradosHoy.size;
+    }
+
+    function playSuccessSound() {
+        // Un pitido simple para feedback rápido
+        const a = new AudioContext();
+        const o = a.createOscillator();
+        const g = a.createGain();
+        o.connect(g); g.connect(a.destination);
+        o.frequency.value = 800; // Frecuencia del pitido
+        g.gain.setValueAtTime(0.1, a.currentTime);
+        o.start();
+        o.stop(a.currentTime + 0.1); // Duración (0.1 seg)
+    }
+
+    // --- INICIALIZAR EL ESCÁNER ---
+    function onScanError(errorMessage) { /* Ignorar errores de escaneo continuo */ }
+
+    async function init() {
+        // 1. Cargamos la base de datos
+        await cargarBD();
+        
+        // 2. Iniciamos el escáner
+        // fps: fotogramas por segundo. qrbox: tamaño del cuadrado de escaneo
+        const html5QrcodeScanner = new Html5QrcodeScanner("qr-reader", { 
+            fps: 10, 
+            qrbox: {width: 250, height: 250},
+            rememberLastUsedCamera: true
         });
-        alert("✅ Ausentes marcados en el Excel.");
-        btn.disabled = false; btn.innerText = "FINALIZAR CLASE";
+        html5QrcodeScanner.render(registrarEscaneo, onScanError);
     }
 
-    function tab(t) {
-        document.getElementById('panel-qr').style.display = t==='qr'?'block':'none';
-        document.getElementById('panel-lista').style.display = t==='lista'?'block':'none';
-        document.getElementById('b-qr').className = t==='qr'?'active':'';
-        document.getElementById('b-lista').className = t==='lista'?'active':'';
-    }
-
-    if(isAdmin) {
-        document.getElementById('view-profe').style.display = 'block';
-        new QRCode(document.getElementById("qr-container"), { text: window.location.href.split('?')[0], width: 200, height: 200 });
-    } else {
-        document.getElementById('view-alumno').style.display = 'block';
-    }
-    cargar();
+    init();
 </script>
 </body>
 </html>
