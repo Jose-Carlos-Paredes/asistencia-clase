@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Asistencia: Escáner Profe</title>
+    <title>Asistencia Profe</title>
     <script src="https://unpkg.com/html5-qr-scanner@2.3.8/html5-qrcode.min.js"></script>
     <style>
         :root { --bg: #000; --card: #121212; --accent: #e8ff47; --green: #4ade80; --red: #ff4d4d; }
@@ -29,7 +29,7 @@
 
     <div class="card" style="padding: 15px;">
         <h3 style="margin-top: 0; margin-bottom: 5px;">Escáner de Asistencia</h3>
-        <p id="camera-status" style="color: #888; font-size: 12px; margin-bottom: 15px;">Iniciando cámara...</p>
+        <p id="camera-status" style="color: #888; font-size: 12px; margin-bottom: 15px;">Apunta la cámara al código QR...</p>
         <div id="camera-container"></div>
     </div>
 
@@ -39,11 +39,11 @@
 
     <div class="card" style="padding: 10px;">
         <h3 style="text-align: left; margin: 10px 15px;">Listado de Clase</h3>
-        <div id="lista-output">Cargando alumnos...</div>
+        <div id="lista-output">Cargando base de datos...</div>
     </div>
 
 <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxWN1F9ATZlu52xKIIaFv_DYnyFehHQILsyG8VY35VKva3ZDC_dXTOoeF8ExXLqjG2f/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzUAPlEghJ6BhWXidfSX-zRoAvbsxw_VKtkNH2wnlUwGLHfTz73wCn5m8H4zfsH-O7M/exec'; // <--- TU URL AQUÍ
     let db = [];
     let yaRegistradosHoy = new Set();
     let isScanning = true;
@@ -164,10 +164,10 @@
                 registrarEscaneo,
                 () => {} // Ignorar fallos de frames continuos
             );
-            statusText.innerText = "Apunta la cámara al código QR del alumno";
+            statusText.innerText = "Cámara activada. Apunta al código QR.";
         } catch (err) {
             console.error(err);
-            statusText.innerText = "❌ Permiso de cámara denegado o no disponible.";
+            statusText.innerText = "❌ Permiso de cámara denegado. Actívalo en ajustes.";
             statusText.style.color = "var(--red)";
         }
     }
